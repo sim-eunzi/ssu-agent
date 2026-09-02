@@ -384,7 +384,8 @@ STUDY_PY=/Users/eunzi/eunzi-tools/bin/study.py
 ```
 
 **토큰은 vault에 절대 넣지 않는다** (GitHub 푸시됨).
-`.env`는 gitignore. `data/**/materials/`도 gitignore.
+`.env`는 gitignore. **`data/` 전체도 gitignore** — 자료(저작물)와 다운로드
+장부(`meta.json`) 둘 다 로컬 런타임 상태다 (2026-09-02).
 
 구동: iMac (`100.126.98.39`, tailnet). 대시보드 `:3001`, 헤르메스봇과 동거.
 `study.py` 호출 때문에 **vault가 있는 기기여야 한다** — 다른 기기 clone 금지 규약.

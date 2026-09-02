@@ -123,7 +123,9 @@ def save_meta(d, meta):
 
 def already_have(job, meta, have_file):
     """장부에 있고 파일도 실제로 있어야 건너뛴다.
-    materials/ 는 gitignore 라 다른 기기에서는 장부만 있고 파일이 없을 수 있다."""
+
+    `data/` 전체가 gitignore 라 clone 한 기기에는 둘 다 없다. 그래도 장부만
+    남고 파일이 지워지는 경우(수동 정리 등)가 있어 파일 존재를 같이 본다."""
     return bool((meta.get("items") or {}).get(job["content_id"])) and have_file
 
 
