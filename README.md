@@ -15,7 +15,7 @@
 |---|---|
 | **M1** 수집·판단 | ✅ 2026-09-02 완료. 7과목 실제 데이터로 검증 |
 | **M2** vault 반영 | ✅ **2026-09-02 완료.** `study_cli.py` — 28건 반영·오류 0·2회차 0건 |
-| **M3** 자료 | ✅ **2026-09-02 완료.** Commons PDF 5개 102MB. 요약(Whisper)은 미착수 |
+| **M3** 자료·요약 | ✅ **2026-09-02.** PDF 5개 102MB + **요약**(PDF→마크다운→LLM). 동영상 전사는 미착수 |
 | **대시보드** | ✅ **2026-09-02.** `/univ/{과목}/{주차}` 3분할 — 주차 행·노트·자료/링크 |
 | **M4** 시험 | 미착수 |
 
@@ -42,6 +42,9 @@ study.py add ... --lock-timeout 30    # 멱등 · 주차 정렬 삽입 · 락 �
 | `risk.py` | 잔여 영상 시간 ÷ 실제 가용 시간 → 🟢🟡🟠🔴 |
 | `events.py` | 스냅샷 diff → 마감 앞당겨짐 / D-3 신규 / 휴강·시험 공지 |
 | `brief.py` | 텍스트/JSON 렌더. 전송 없음 |
+| `study_cli.py` | Canvas 상태 → vault. `study.py` 를 서브프로세스로 (직접 쓰기 없음) |
+| `materials.py` | Commons PDF 다운로드 + 주차 인덱스(`meta.json`) |
+| `summarize.py` | 자료 → 마크다운 → LLM 요약. **재개 장부**로 중단·에러를 이어받는다 |
 
 ## 쓰기
 
@@ -87,7 +90,7 @@ python3 -m unittest discover -s tests -t .
 | 잡 | 언제 | 하는 일 |
 |---|---|---|
 | `com.eunzi.ssu-sync` | 30분마다 (07~23시) | `sync` → `vault-sync` |
-| `com.eunzi.ssu-materials` | 매일 03:00 | `sync` → `materials` |
+| `com.eunzi.ssu-materials` | 매일 03:00 | `sync` → `materials` → `summarize` (**비용 발생**) |
 
 래퍼는 `bin/ssu-agent-cron` · `bin/ssu-agent-materials-cron`. 07시 이전이면 그냥
 빠져나온다. **`sync` 가 실패하면 `vault-sync` 를 건너뛴다** — 낡은 스냅샷으로
@@ -123,7 +126,8 @@ tail -f state/cron.log
 
 ## 아직 안 한 것
 
-- **M3 요약** — mp4 → MLX Whisper → `summary.md`. 생기면 대시보드 주차 상세 왼쪽 칸이 채워진다
+- **동영상 요약** — `faster-whisper` 전사 → 같은 LLM 경로. 추출 함수만 붙이면 된다
+- **스캔 PDF** — 4차산업 자료 2개는 텍스트 레이어가 없다(`unsupported_scanned`). 비전 모델은 건당 $1~2 라 보류
 - **헤르메스봇에 `brief` 위험도 배선** — 마감 요약(`study.py due`)은 2026-09-02 아침 체크인에 붙었다. 밀린 영상 시간은 아직
 - **M4** study-coach 업로드
 - `progress` 필드 스케일 실측 — 아직 시청 이력이 0 이라 못 했다 (§10-5)
