@@ -6,6 +6,7 @@
     ssu-agent brief [kind]        morning|evening|weekly 텍스트
     ssu-agent brief --json        헤르메스봇이 받아갈 구조 (--ack 로 outbox 비움)
     ssu-agent items [과목]        남은 항목 나열
+    ssu-agent vault-sync          Canvas 상태를 vault 에 반영 (study.py 경유)
 
 **아무것도 전송하지 않는다.** 텔레그램은 헤르메스봇 하나가 담당한다.
 이 CLI 는 계산해서 stdout 으로 내놓기만 한다.
@@ -18,7 +19,7 @@ import time
 
 from . import brief as brief_mod
 from . import canvas as canvas_mod
-from . import events, risk, state, sync
+from . import events, risk, state, study_cli, sync
 from .config import ROOT, get
 
 
@@ -118,6 +119,47 @@ def cmd_items(a):
     return 0
 
 
+def cmd_vault_sync(a):
+    """Canvas → vault. study.py 를 서브프로세스로 부른다 — 직접 쓰지 않는다."""
+    cfg = get()
+    missing = cfg.missing("STUDY_PY", "VAULT_PATH")
+    if missing:
+        raise SystemExit("환경변수가 비었다: " + ", ".join(missing))
+    snap = _snapshot(refresh=a.refresh)
+    store = state.load(study_cli.SKIPPED)
+    tot = {"applied": 0, "skipped": 0, "errors": 0}
+    locked = False
+
+    for _cid, entry in sorted(snap.get("courses", {}).items()):
+        stem = entry.get("stem")
+        vault = study_cli.read_vault(stem)
+        if not vault:
+            print("  {:20s} vault 를 못 읽었다 — 건너뜀".format(stem))
+            continue
+        acts, skips = study_cli.plan(stem, vault, study_cli.canvas_rows(entry))
+        study_cli.note_skips(skips, store)
+        if not acts and not skips:
+            continue
+        print("  {:20s} {}건{}".format(
+            stem, len(acts), "  (스킵 %d)" % len(skips) if skips else ""))
+        for x in acts:
+            print("      {action:8s} {week}주차 {type}{extra}".format(
+                extra=(" → " + x["due"]) if x.get("due") else "", **x))
+        res = study_cli.apply(acts, dry_run=a.dry_run, skipped=store)
+        for k in ("applied", "skipped", "errors"):
+            tot[k] += res[k]
+        if res["locked"]:
+            locked = True
+            print("  ⏸ 락 대기 초과 — 사이클을 건너뛴다. 다음 주기에 재시도")
+            break
+
+    if not a.dry_run:
+        state.save(study_cli.SKIPPED, store)
+    print("{} 적용 {applied} · 스킵 {skipped} · 오류 {errors}{}".format(
+        "[dry-run]" if a.dry_run else "", "  ⏸ 락" if locked else "", **tot))
+    return 0
+
+
 # ---------------------------------------------------------------- main
 def build_parser():
     p = argparse.ArgumentParser(
@@ -144,6 +186,12 @@ def build_parser():
     br.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
     br.add_argument("--full", action="store_true")
     br.set_defaults(func=cmd_brief)
+
+    vs = sub.add_parser("vault-sync")
+    vs.add_argument("--dry-run", action="store_true",
+                    help="study.py 에 --dry-run 을 붙여 부른다. vault 무변경")
+    vs.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
+    vs.set_defaults(func=cmd_vault_sync)
 
     it = sub.add_parser("items")
     it.add_argument("course", nargs="?", help="vault stem 또는 Canvas ID")
