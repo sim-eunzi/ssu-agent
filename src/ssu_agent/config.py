@@ -14,17 +14,25 @@ KST = timezone(timedelta(hours=9))
 
 
 def load_dotenv(path=None):
-    """.env 를 os.environ 에 주입한다. 이미 있는 값은 덮지 않는다."""
+    """.env 를 os.environ 에 주입한다. 이미 있는 환경변수는 덮지 않는다.
+
+    🔴 파일 안에 같은 키가 여러 줄이면 **나중 줄**이 이긴다.
+    한 줄씩 setdefault 하면 먼저 나온 줄이 이겨서, 빈 자리표시자 아래에
+    진짜 값을 append 했을 때 빈 값이 이긴다 — 2026-09-02 에 두 번 걸렸다
+    (CANVAS_TOKEN, 그리고 API 키). append 가 직관대로 동작해야 한다.
+    """
     path = Path(path) if path else ROOT / ".env"
     if not path.exists():
         return
+    seen = {}
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
         k, v = line.split("=", 1)
-        v = v.split(" #")[0].strip().strip("'\"")
-        os.environ.setdefault(k.strip(), v)
+        seen[k.strip()] = v.split(" #")[0].strip().strip("'\"")
+    for k, v in seen.items():
+        os.environ.setdefault(k, v)
 
 
 class Config:

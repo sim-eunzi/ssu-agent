@@ -384,3 +384,36 @@ class TestBrief(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class DotenvDuplicates(unittest.TestCase):
+    """🔴 2026-09-02 에 두 번 걸린 함정 — 같은 키가 두 줄이면 어느 쪽이 이기나.
+
+    setdefault 로 한 줄씩 넣으면 **먼저 나온 줄**이 이긴다. 빈 자리표시자를
+    위에 두고 진짜 값을 아래에 append 하면 빈 값이 이겨서 인증이 실패한다.
+    파일 안에서는 **나중 줄**이 이겨야 append 가 직관대로 동작한다.
+    """
+
+    def _load(self, text, env):
+        import tempfile, os, pathlib
+        from ssu_agent import config as cfg
+        with tempfile.TemporaryDirectory() as d:
+            p = pathlib.Path(d) / ".env"
+            p.write_text(text, encoding="utf-8")
+            keep = dict(os.environ)
+            os.environ.clear()
+            os.environ.update(env)
+            try:
+                cfg.load_dotenv(p)
+                return dict(os.environ)
+            finally:
+                os.environ.clear()
+                os.environ.update(keep)
+
+    def test_later_line_wins(self):
+        got = self._load("K=\nK=진짜값\n", {})
+        self.assertEqual(got.get("K"), "진짜값", "나중에 append 한 줄이 이긴다")
+
+    def test_real_environment_still_wins_over_file(self):
+        got = self._load("K=파일값\n", {"K": "환경값"})
+        self.assertEqual(got.get("K"), "환경값", "이미 있는 환경변수는 안 덮는다")

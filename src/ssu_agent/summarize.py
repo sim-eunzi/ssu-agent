@@ -14,7 +14,7 @@
 
 ## 의존성은 여기서만 쓴다
 
-`pymupdf4llm`·`openai` 는 **함수 안에서 import** 한다. ssu-agent 의 나머지
+`pymupdf4llm` 과 LLM SDK 는 **함수 안에서 import** 한다. ssu-agent 의 나머지
 (sync·vault-sync·materials·brief)는 의존성 0 을 그대로 유지한다.
 
 LLM 은 갈아끼울 수 있게 한 함수에 가둬 뒀다 — `run(llm=...)` 로 주입한다.
@@ -35,16 +35,22 @@ from datetime import datetime
 
 from .config import DATA_DIR, KST
 
-MODEL = os.environ.get("SUMMARY_MODEL", "gpt-5.1")
+PROVIDER = os.environ.get("SUMMARY_PROVIDER", "anthropic")   # anthropic | openai
+_DEFAULT_MODEL = {"anthropic": "claude-opus-5", "openai": "gpt-5.1"}
+MODEL = os.environ.get("SUMMARY_MODEL") or _DEFAULT_MODEL.get(PROVIDER, "claude-opus-5")
 EFFORT = os.environ.get("SUMMARY_EFFORT", "medium")   # gpt-5 계열 reasoning_effort
 CHUNK_CHARS = int(os.environ.get("SUMMARY_CHUNK_CHARS", "40000"))
 MAX_CALLS = int(os.environ.get("SUMMARY_MAX_CALLS", "30"))   # 실행당 LLM 호출 상한
 
 # 추정용. 청구서가 아니라 눈대중이다 — 모델을 바꾸면 이 값도 바꿔야 한다.
-USD_IN = float(os.environ.get("SUMMARY_USD_IN", "1.25")) / 1_000_000
-USD_OUT = float(os.environ.get("SUMMARY_USD_OUT", "10.0")) / 1_000_000
-CHARS_PER_TOKEN = 2.0        # 한글 섞인 글의 눈대중
-EST_OUT_TOKENS = 900
+_DEFAULT_USD = {"anthropic": (5.0, 25.0), "openai": (1.25, 10.0)}   # Opus 5 / gpt-5.1
+_ui, _uo = _DEFAULT_USD.get(PROVIDER, (5.0, 25.0))
+USD_IN = float(os.environ.get("SUMMARY_USD_IN", _ui)) / 1_000_000
+USD_OUT = float(os.environ.get("SUMMARY_USD_OUT", _uo)) / 1_000_000
+# 2026-09-02 실측으로 보정 — 3문서 8,027자가 입력 8,019토큰이었다.
+# 한글은 거의 1자=1토큰이다(처음엔 2.0 으로 잡아 절반을 밑돌았다).
+CHARS_PER_TOKEN = 1.0
+EST_OUT_TOKENS = 1600        # 실측 3회 4,690토큰 → 회당 ~1,563
 
 # 실제 청구 토큰. call_openai 가 채우고 run 이 장부에 옮긴다 — 어림이 아니라 실측이다.
 # 주입한 가짜 llm 은 건드리지 않으므로 테스트에서는 0 으로 남는다.
@@ -159,49 +165,96 @@ PROMPT_MERGE = """아래는 「{course}」 {week}주차 자료 「{file}」 를 
 {body}"""
 
 
-def list_models():
-    """이 키로 볼 수 있는 모델. 모델명을 고를 때 쓴다."""
-    from openai import OpenAI
-    return sorted(m.id for m in OpenAI().models.list().data)
+def _anthropic():
+    try:
+        import anthropic
+    except ImportError as e:
+        raise RuntimeError("anthropic 이 없다: pip3 install anthropic") from e
+    return anthropic
 
 
-def call_openai(prompt, system=SYSTEM, model=None, effort=None, max_tokens=4000):
-    """공식 SDK 로 부른다. openai 는 여기서만 import 한다."""
+def _openai():
     try:
         from openai import OpenAI
     except ImportError as e:
         raise RuntimeError("openai 가 없다: pip3 install openai") from e
-    client = OpenAI()
+    return OpenAI
+
+
+def list_models():
+    """이 키로 볼 수 있는 모델. SUMMARY_MODEL 을 고를 때 쓴다."""
+    if PROVIDER == "openai":
+        return sorted(m.id for m in _openai()().models.list().data)
+    return sorted(m.id for m in _anthropic().Anthropic().models.list().data)
+
+
+def _call_anthropic(prompt, system, model, effort, max_tokens):
+    client = _anthropic().Anthropic()
+    kw = dict(model=model, max_tokens=max_tokens, system=system,
+              messages=[{"role": "user", "content": prompt}],
+              thinking={"type": "adaptive"}, output_config={"effort": effort})
+    try:
+        r = client.messages.create(**kw)
+    except TypeError:                        # 구버전 SDK 는 thinking/output_config 를 모른다
+        kw.pop("thinking", None)
+        kw.pop("output_config", None)
+        r = client.messages.create(**kw)
+    if getattr(r, "stop_reason", None) == "refusal":
+        raise RuntimeError("모델이 거절했다: %s" % getattr(r, "stop_details", None))
+    u = getattr(r, "usage", None)
+    if u is not None:
+        LAST_USAGE.update(input=getattr(u, "input_tokens", 0),
+                          output=getattr(u, "output_tokens", 0),
+                          model=getattr(r, "model", model))
+    return "\n".join(b.text for b in r.content if b.type == "text").strip()
+
+
+def _call_openai(prompt, system, model, effort, max_tokens):
+    client = _openai()()
     msgs = [{"role": "system", "content": system},
             {"role": "user", "content": prompt}]
-    kw = dict(model=model or MODEL, messages=msgs,
-              max_completion_tokens=max_tokens, reasoning_effort=effort or EFFORT)
+    kw = dict(model=model, messages=msgs,
+              max_completion_tokens=max_tokens, reasoning_effort=effort)
     for _ in range(2):
         try:
             r = client.chat.completions.create(**kw)
             break
         except TypeError:
-            kw.pop("reasoning_effort", None)        # 그 파라미터를 모르는 모델
+            kw.pop("reasoning_effort", None)
         except Exception as e:
-            msg = str(e)
-            if "reasoning_effort" in msg or "max_completion_tokens" in msg:
+            m = str(e)
+            if "reasoning_effort" in m or "max_completion_tokens" in m:
                 kw.pop("reasoning_effort", None)
                 kw["max_tokens"] = kw.pop("max_completion_tokens", max_tokens)
                 continue
-            if "model" in msg and ("not exist" in msg or "not found" in msg):
-                raise RuntimeError(
-                    "모델 '%s' 을 못 찾는다. `ssu-agent summarize --models` 로 "
-                    "쓸 수 있는 걸 보고 .env 의 SUMMARY_MODEL 을 고쳐라" % kw["model"]) from e
             raise
     else:
         raise RuntimeError("LLM 호출이 두 번 다 실패했다")
     u = getattr(r, "usage", None)
-    LAST_USAGE.clear()
     if u is not None:
         LAST_USAGE.update(input=getattr(u, "prompt_tokens", 0),
                           output=getattr(u, "completion_tokens", 0),
-                          model=getattr(r, "model", kw["model"]))
+                          model=getattr(r, "model", model))
     return (r.choices[0].message.content or "").strip()
+
+
+def call_llm(prompt, system=SYSTEM, model=None, effort=None, max_tokens=4000):
+    """공급자는 SUMMARY_PROVIDER 로 고른다 — 둘 다 공식 SDK 를 쓴다.
+
+    갈아끼울 수 있게 한 함수에 가둬 뒀다. 이 세션에서 두 번 갈아탔다:
+    Claude → (은지 키가 OpenAI 라) OpenAI → (다시) Claude.
+    """
+    LAST_USAGE.clear()
+    fn = _call_openai if PROVIDER == "openai" else _call_anthropic
+    try:
+        return fn(prompt, system, model or MODEL, effort or EFFORT, max_tokens)
+    except Exception as e:
+        m = str(e)
+        if "model" in m and ("not exist" in m or "not_found" in m or "not found" in m):
+            raise RuntimeError(
+                "모델 '%s' 을 못 찾는다. `ssu-agent summarize --models` 로 확인하고 "
+                ".env 의 SUMMARY_MODEL 을 고쳐라" % (model or MODEL)) from e
+        raise
 
 
 # ------------------------------------------------------------------ 대상
@@ -263,7 +316,7 @@ def _add_usage(res, rec):
     rec["model_used"] = u.get("model")
 
 
-def run(semester, extract=extract_pdf, llm=call_openai, chunk_size=CHUNK_CHARS,
+def run(semester, extract=extract_pdf, llm=call_llm, chunk_size=CHUNK_CHARS,
         max_calls=MAX_CALLS, root=None, log=print):
     res = {"done": 0, "skipped": 0, "failed": 0, "unsupported": 0,
            "calls": 0, "budget_hit": False, "in_tokens": 0, "out_tokens": 0}
