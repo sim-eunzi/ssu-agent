@@ -115,13 +115,21 @@ def remaining_seconds(item, estimate=None):
     return max(0.0, float(dur) - watched)
 
 
+def _week_field(item, weeks, field):
+    wk = weeks.get(str(item.get("week"))) or {}
+    return parse_dt(wk.get(field))
+
+
 def deadline_of(item, weeks):
     """아이템 마감. 없으면 그 주차 마감으로 폴백."""
-    dt = parse_dt(item.get("due_at"))
-    if dt:
-        return dt
-    wk = weeks.get(str(item.get("week"))) or {}
-    return parse_dt(wk.get("due_at"))
+    return parse_dt(item.get("due_at")) or _week_field(item, weeks, "due_at")
+
+
+def unlock_of(item, weeks):
+    """아이템 개방 시각. 미개봉(404) 항목은 아이템 값이 없으므로
+    주차 unlock_at 으로 폴백한다. 이게 없으면 아직 안 열린 6주차 강의가
+    '지금 밀린 분량'으로 잡혀 숫자가 부풀어 오른다."""
+    return parse_dt(item.get("unlock_at")) or _week_field(item, weeks, "unlock_at")
 
 
 def level(ratio):
@@ -184,7 +192,7 @@ def assess(snapshot, now=None, cfg=None):
         for it in c.get("items", []):
             if it.get("kind") != "lecture" or it.get("completed"):
                 continue
-            unlock = parse_dt(it.get("unlock_at"))
+            unlock = unlock_of(it, weeks)
             if unlock and unlock > now:
                 continue                    # 아직 안 열림
             dl = deadline_of(it, weeks)
