@@ -82,8 +82,20 @@ python3 -m unittest discover -s tests -t .
 
 `study.py` 를 호출해야 하므로 **vault 가 있는 기기에서만** 돈다. 다른 기기 clone 금지.
 
-```cron
-*/30 7-23  * * *  cd ~/ssu-agent && ./bin/ssu-agent sync >> state/cron.log 2>&1
+**2026-09-02부터 launchd 로 자동 실행된다.**
+
+| 잡 | 언제 | 하는 일 |
+|---|---|---|
+| `com.eunzi.ssu-sync` | 30분마다 (07~23시) | `sync` → `vault-sync` |
+| `com.eunzi.ssu-materials` | 매일 03:00 | `sync` → `materials` |
+
+래퍼는 `bin/ssu-agent-cron` · `bin/ssu-agent-materials-cron`. 07시 이전이면 그냥
+빠져나온다. **`sync` 가 실패하면 `vault-sync` 를 건너뛴다** — 낡은 스냅샷으로
+vault 를 고치지 않는다. 로그는 `state/cron.log` (2000줄 회전, git 미추적).
+
+```bash
+launchctl list | grep com.eunzi.ssu     # 둘 다 보여야 한다
+tail -f state/cron.log
 ```
 
 브리핑 시각(아침 07:30 / 저녁 21:30 / 토 10:00)은 **헤르메스봇이 정한다.**

@@ -1,8 +1,8 @@
 # 비밀
 .env
 
-# 런타임 상태
-state/*.json
+# 런타임 상태 — json 뿐 아니라 cron.log 도 여기 쌓인다
+state/*
 !state/.gitkeep
 
 # 자료 캐시(저작물) + 다운로드 장부 — 전부 로컬 런타임 상태.

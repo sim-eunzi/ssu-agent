@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# launchd 가 부르는 래퍼. 30분마다 깨어나되 07~23시에만 일한다.
+#
+# 왜 새벽을 비우나 — 그 시간에 LMS 가 바뀔 일이 없고, 밤사이 마감이
+# 지나가면 어차피 늦는다. 자료(materials)는 무거우니 별도 03:00 잡이 한다.
+#
+# 🔴 study.py 가 호출마다 커밋·푸시한다. 변경이 없으면 아무것도 쓰지 않으므로
+#    (study_cli 가 차이만 넘긴다) 조용한 사이클은 커밋을 만들지 않는다.
+set -uo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 0
+
+H=$(date +%H)
+case "$H" in 0[0-6]|24) exit 0 ;; esac      # 07시 이전이면 자고
+
+LOG="state/cron.log"
+mkdir -p state
+say() { printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG"; }
+
+# 로그가 무한정 자라지 않게 (2000줄 유지)
+[ -f "$LOG" ] && [ "$(wc -l < "$LOG")" -gt 4000 ] && tail -2000 "$LOG" > "$LOG.tmp" && mv "$LOG.tmp" "$LOG"
+
+say "── sync"
+if ! ./bin/ssu-agent sync >> "$LOG" 2>&1; then
+  say "✖ sync 실패 — vault 반영은 건너뛴다"
+  exit 0                                    # 수집이 실패하면 낡은 스냅샷으로 쓰지 않는다
+fi
+
+say "── vault-sync"
+./bin/ssu-agent vault-sync >> "$LOG" 2>&1 || say "✖ vault-sync 실패"

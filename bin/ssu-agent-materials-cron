@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# 자료 다운로드 + 주차 인덱스. 하루 한 번(03:00) 이면 충분하다 —
+# 교수가 자료를 올리는 건 하루 단위 사건이고, 받는 건 무겁다.
+set -uo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 0
+mkdir -p state
+LOG="state/cron.log"
+printf '%s ── materials\n' "$(date '+%F %T')" >> "$LOG"
+./bin/ssu-agent sync >> "$LOG" 2>&1 && ./bin/ssu-agent materials >> "$LOG" 2>&1 \
+  || printf '%s ✖ materials 실패\n' "$(date '+%F %T')" >> "$LOG"
