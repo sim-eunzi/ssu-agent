@@ -7,6 +7,7 @@
     ssu-agent brief --json        헤르메스봇이 받아갈 구조 (--ack 로 outbox 비움)
     ssu-agent items [과목]        남은 항목 나열
     ssu-agent vault-sync          Canvas 상태를 vault 에 반영 (study.py 경유)
+    ssu-agent materials           개봉된 강의의 PDF 자료 내려받기 (data/)
 
 **아무것도 전송하지 않는다.** 텔레그램은 헤르메스봇 하나가 담당한다.
 이 CLI 는 계산해서 stdout 으로 내놓기만 한다.
@@ -19,7 +20,7 @@ import time
 
 from . import brief as brief_mod
 from . import canvas as canvas_mod
-from . import events, risk, state, study_cli, sync
+from . import events, materials, risk, state, study_cli, sync
 from .config import ROOT, get
 
 
@@ -160,6 +161,23 @@ def cmd_vault_sync(a):
     return 0
 
 
+def cmd_materials(a):
+    """개봉된 강의의 PDF 만. 미개봉은 404 라 자료 정보 자체가 없다 (§2.2)."""
+    snap = _snapshot(refresh=a.refresh)
+    res = materials.run(snap, snap.get("semester") or get().semester,
+                        dry_run=a.dry_run)
+    print("{} 저장 {saved} · 건너뜀 {skipped} · 실패 {failed} · {mb:.1f}MB".format(
+        "[dry-run]" if a.dry_run else "", mb=res["bytes"] / 1048576.0, **res))
+    pend = materials.not_ready(snap)
+    if pend:
+        print("아직 공개 전 {}건 — 주차가 풀리면 받는다 (실패 아님)".format(len(pend)))
+        for x in pend[:5]:
+            print("    {stem} W{week:02d} {file}".format(**x))
+        if len(pend) > 5:
+            print("    … 외 {}건".format(len(pend) - 5))
+    return 0
+
+
 # ---------------------------------------------------------------- main
 def build_parser():
     p = argparse.ArgumentParser(
@@ -192,6 +210,11 @@ def build_parser():
                     help="study.py 에 --dry-run 을 붙여 부른다. vault 무변경")
     vs.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
     vs.set_defaults(func=cmd_vault_sync)
+
+    ma = sub.add_parser("materials")
+    ma.add_argument("--dry-run", action="store_true", help="받을 목록만 보인다")
+    ma.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
+    ma.set_defaults(func=cmd_materials)
 
     it = sub.add_parser("items")
     it.add_argument("course", nargs="?", help="vault stem 또는 Canvas ID")
