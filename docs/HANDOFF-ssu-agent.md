@@ -210,8 +210,8 @@ ssu-agent/                       신규 repo (iMac)
 | SQLite 별도 상태 저장소 | 변경 시에만 쓰므로 커밋 노이즈 없음. 이전 스냅샷 = `.md` 자체 | — |
 | vault에 `notes/` | 2026-08-26에 이미 폐기된 설계 | 커밋 `b1fdc0f` |
 | 새벽 4시 일괄 커밋 / `chore(lms):` / `pull --rebase` | `study.py`는 쓰기마다 즉시 commit+push, 🎓 접두어, `--no-rebase` | `study.py:415-442`, `:508` |
-| 텔레그램 양방향(버튼 체크) | 같은 봇 토큰 2프로세스 폴링 시 업데이트 경합. 쓰기 경로는 LMS 하나로 | — |
-| 헤르메스봇에 통합 | 읽기 전용이면 새 봇이 더 쌈. 잘 도는 코드 건드리는 비용이 더 큼 | — |
+| 텔레그램 양방향(버튼 체크) | 경합은 `getUpdates` 폴링에서만 난다. 헤르메스봇이 이미 폴링 중이므로 ssu-agent 는 `sendMessage` 만 쓴다. 쓰기 경로는 LMS 하나로 | — |
+| 헤르메스봇 코드에 통합 | 잘 도는 코드를 건드리는 비용이 더 큼. **봇 인스턴스는 공유, 코드는 분리** — 토큰·채팅방은 헤르메스봇 것을 그대로 쓴다 | — |
 | 헤드리스 브라우저 / SSO 자동 로그인 | §2.1 체인으로 불필요 | — |
 | 과목별 주차 오프셋 예외 테이블 | `seed_univ.py`가 이미 `week_offset` 보유 → drift 지점 생김 | — |
 | K-MOOC 어댑터 | 범위 밖으로 확정 | — |
@@ -272,8 +272,8 @@ Commons 다운로드 → `materials/`. mp4 → MLX Whisper → `summary.md`
 ```bash
 CANVAS_BASE=https://canvas.ssu.ac.kr
 CANVAS_TOKEN=      # 개인 액세스 토큰. 만료 2026-12-31
-TELEGRAM_TOKEN=    # 신규 봇 (@BotFather)
-TELEGRAM_CHAT_ID=
+TELEGRAM_TOKEN=    # 헤르메스봇과 동일 토큰 (발신 전용이라 경합 없음)
+TELEGRAM_CHAT_ID=  # 동일 채팅방
 VAULT_PATH=/Users/eunzi/eunzi-os
 STUDY_PY=/Users/eunzi/eunzi-tools/bin/study.py
 ```
