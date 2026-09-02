@@ -35,17 +35,20 @@ RC_LOCKED = 3
 
 
 # ---------------------------------------------------------------- 변환
-def mmdd(iso):
-    """ISO8601 → KST 기준 `MM-DD`. vault 표가 쓰는 형식이다."""
+def _dt(iso):
     if not iso:
         return None
     try:
-        dt = datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
+        d = datetime.fromisoformat(str(iso).replace("Z", "+00:00"))
     except ValueError:
         return None
-    if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(KST).strftime("%m-%d")
+    return d.replace(tzinfo=timezone.utc) if d.tzinfo is None else d
+
+
+def mmdd(iso):
+    """ISO8601 → KST 기준 `MM-DD`. vault 표가 쓰는 형식이다."""
+    d = _dt(iso)
+    return d.astimezone(KST).strftime("%m-%d") if d else None
 
 
 def safe(s):
@@ -57,10 +60,20 @@ def safe(s):
 def canvas_rows(entry):
     """스냅샷 과목 entry → {(주차, 유형): 상태}.
 
-    키가 겹치면(한 주차에 같은 유형 둘) 어느 vault 행에 붙일지 알 수 없다 —
-    지우지 말고 `ambiguous` 로 표시해 plan 이 건너뛰게 한다.
+    **강의는 주차 단위로 접는다.** vault 는 주차당 강의 1행(강의계획서 단위)인데
+    Canvas 는 영상 아이템이 여러 개다 — 실측으로 한나아렌트 6개/주차,
+    3code 7개/주차, 한반도평화와통일은 전 주차가 그렇다. 1:1 로 보면 전부
+    모호해져 강의 동기화가 통째로 비어버린다.
+
+    - 완료 = 그 주차 영상을 **전부** 봤을 때
+    - 마감 = `weeks`(lessons) 의 주차 마감. 미개봉 항목은 404 라 `due_at` 이
+      아예 없어서, 아이템에서 뽑으면 대부분 None 이 된다 (핸드오프 §2.2)
+
+    퀴즈·과제는 접지 않는다 — vault 행이 여럿이어야 할 수도 있어 추측이 위험하다.
+    겹치면 `ambiguous` 로 두고 plan 이 건너뛴다.
     """
-    out = {}
+    weeks = entry.get("weeks") or {}
+    out, lectures = {}, {}
     for it in entry.get("items") or []:
         typ = KIND_TO_TYPE.get(it.get("kind"))
         wk = it.get("week")
@@ -69,6 +82,9 @@ def canvas_rows(entry):
         try:
             wk = int(wk)
         except (TypeError, ValueError):
+            continue
+        if typ == "강의":
+            lectures.setdefault(wk, []).append(it)
             continue
         key = (wk, typ)
         if key in out:
@@ -79,6 +95,20 @@ def canvas_rows(entry):
                     "completed": bool(it.get("completed")),
                     "unopened": bool(it.get("unopened")),
                     "ambiguous": False}
+
+    for wk, its in lectures.items():
+        due = mmdd((weeks.get(str(wk)) or {}).get("due_at"))
+        if due is None:                       # lessons 가 없으면 아이템 중 가장 늦은 것
+            got = [d for d in (_dt(i.get("due_at")) for i in its) if d]
+            due = max(got).astimezone(KST).strftime("%m-%d") if got else None
+        out[(wk, "강의")] = {
+            "title": "%d주차 강의" % wk,       # vault 의 'N주차 퀴즈' 명명과 맞춘다
+            "due": due,
+            "completed": all(bool(i.get("completed")) for i in its),
+            "unopened": any(bool(i.get("unopened")) for i in its),
+            "ambiguous": False,
+            "count": len(its),
+        }
     return out
 
 

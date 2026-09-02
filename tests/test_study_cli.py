@@ -70,6 +70,57 @@ class KindMapping(unittest.TestCase):
         self.assertEqual(sc.canvas_rows(e)[(3, "퀴즈")]["due"], "09-21")
 
 
+class LectureAggregation(unittest.TestCase):
+    """vault 는 주차당 강의 1행(강의계획서 단위), Canvas 는 영상 N개.
+    한나아렌트 6개/주차 · 3code 7개/주차 · 한반도평화와통일 전 주차 중복 (실측)."""
+
+    W = {"3": {"due_at": kst_due("09-21"), "late_at": kst_due("09-28")}}
+
+    def test_many_items_collapse_to_one_row(self):
+        got = sc.canvas_rows(snap([lec(3, "3-1"), lec(3, "3-2"), lec(3, "3-3")],
+                                  weeks=self.W))
+        self.assertEqual(list(got), [(3, "강의")])
+        self.assertFalse(got[(3, "강의")]["ambiguous"], "집계 대상이지 모호한 게 아니다")
+
+    def test_all_watched_means_done(self):
+        got = sc.canvas_rows(snap([lec(3, "a", completed=True),
+                                   lec(3, "b", completed=True)], weeks=self.W))
+        self.assertTrue(got[(3, "강의")]["completed"])
+
+    def test_one_unwatched_is_not_done(self):
+        got = sc.canvas_rows(snap([lec(3, "a", completed=True),
+                                   lec(3, "b", completed=False)], weeks=self.W))
+        self.assertFalse(got[(3, "강의")]["completed"], "하나라도 남으면 그 주차는 안 끝났다")
+
+    def test_due_comes_from_week_metadata(self):
+        """미개봉 항목은 due_at 이 아예 없다 (404 라 attendance 를 못 받는다).
+        주차 마감은 lessons 가 준다 — 7과목 15주 100% 커버 (핸드오프 §2.2)."""
+        got = sc.canvas_rows(snap([lec(3, "a"), lec(3, "b")], weeks=self.W))
+        self.assertEqual(got[(3, "강의")]["due"], "09-21")
+
+    def test_falls_back_to_latest_item_due(self):
+        got = sc.canvas_rows(snap([lec(3, "a", due=kst_due("09-19")),
+                                   lec(3, "b", due=kst_due("09-21"))]))
+        self.assertEqual(got[(3, "강의")]["due"], "09-21", "가장 늦은 것 — 이르면 오알림")
+
+    def test_week_without_lecture_items_makes_no_row(self):
+        got = sc.canvas_rows(snap([quiz(3)], weeks={"3": {"due_at": kst_due("09-21")},
+                                                    "4": {"due_at": kst_due("09-28")}}))
+        self.assertNotIn((3, "강의"), got)
+        self.assertNotIn((4, "강의"), got)
+
+    def test_aggregated_row_is_named_by_week(self):
+        got = sc.canvas_rows(snap([lec(3, "3-1 어쩌고"), lec(3, "3-2 저쩌고")],
+                                  weeks=self.W))
+        self.assertEqual(got[(3, "강의")]["title"], "3주차 강의",
+                         "vault 의 'N주차 퀴즈' 명명과 맞춘다")
+
+    def test_quizzes_still_ambiguous_when_duplicated(self):
+        """퀴즈는 접지 않는다 — vault 행이 여럿이어야 할 수도 있어 추측이 위험하다."""
+        got = sc.canvas_rows(snap([quiz(8, "A"), quiz(8, "B")]))
+        self.assertTrue(got[(8, "퀴즈")]["ambiguous"])
+
+
 class Plan(unittest.TestCase):
     def _plan(self, vault, canvas_items):
         return sc.plan("선형대수", sc.parse_vault(vault),
