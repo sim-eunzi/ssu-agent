@@ -209,6 +209,8 @@ def cmd_summarize(a):
                          % (type(e).__name__, str(e).split("\n")[0][:160]))
     print("요약 {done} · 건너뜀 {skipped} · 스캔 {unsupported} · 실패 {failed} "
           "· 호출 {calls}회{}".format("  ⏸ 상한" if res["budget_hit"] else "", **res))
+    if res.get("in_tokens") or res.get("out_tokens"):
+        print("  실제 토큰 — 입력 {in_tokens:,} · 출력 {out_tokens:,}".format(**res))
     if res["budget_hit"]:
         print("  남은 것은 .progress/ 에 있다 — 다음 실행이 이어받는다")
     return 0

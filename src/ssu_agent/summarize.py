@@ -46,6 +46,10 @@ USD_OUT = float(os.environ.get("SUMMARY_USD_OUT", "10.0")) / 1_000_000
 CHARS_PER_TOKEN = 2.0        # 한글 섞인 글의 눈대중
 EST_OUT_TOKENS = 900
 
+# 실제 청구 토큰. call_openai 가 채우고 run 이 장부에 옮긴다 — 어림이 아니라 실측이다.
+# 주입한 가짜 llm 은 건드리지 않으므로 테스트에서는 0 으로 남는다.
+LAST_USAGE = {}
+
 
 def now():
     return datetime.now(KST).isoformat(timespec="seconds")
@@ -191,6 +195,12 @@ def call_openai(prompt, system=SYSTEM, model=None, effort=None, max_tokens=4000)
             raise
     else:
         raise RuntimeError("LLM 호출이 두 번 다 실패했다")
+    u = getattr(r, "usage", None)
+    LAST_USAGE.clear()
+    if u is not None:
+        LAST_USAGE.update(input=getattr(u, "prompt_tokens", 0),
+                          output=getattr(u, "completion_tokens", 0),
+                          model=getattr(r, "model", kw["model"]))
     return (r.choices[0].message.content or "").strip()
 
 
@@ -239,10 +249,24 @@ def _write_section(week_dir, filename, body):
 
 
 # ------------------------------------------------------------------ 실행
+def _add_usage(res, rec):
+    """직전 호출의 실제 토큰을 실행 합계와 문서 장부에 더한다."""
+    u = dict(LAST_USAGE)
+    LAST_USAGE.clear()
+    if not u:
+        return
+    res["in_tokens"] = res.get("in_tokens", 0) + u.get("input", 0)
+    res["out_tokens"] = res.get("out_tokens", 0) + u.get("output", 0)
+    d = rec.setdefault("usage", {"input": 0, "output": 0})
+    d["input"] += u.get("input", 0)
+    d["output"] += u.get("output", 0)
+    rec["model_used"] = u.get("model")
+
+
 def run(semester, extract=extract_pdf, llm=call_openai, chunk_size=CHUNK_CHARS,
         max_calls=MAX_CALLS, root=None, log=print):
     res = {"done": 0, "skipped": 0, "failed": 0, "unsupported": 0,
-           "calls": 0, "budget_hit": False}
+           "calls": 0, "budget_hit": False, "in_tokens": 0, "out_tokens": 0}
     for wd, cid, fname, meta in _targets(semester, root):
         pr = load_progress(wd, cid)
         if pr.get("status") in ("done", "unsupported_scanned"):
@@ -295,6 +319,7 @@ def run(semester, extract=extract_pdf, llm=call_openai, chunk_size=CHUNK_CHARS,
                     i=i + 1, n=len(chunks), body=body, **ctx)
                 partials.append(llm(prompt))
                 res["calls"] += 1
+                _add_usage(res, rec)
                 rec = save_progress(wd, cid, dict(rec, partials=partials,
                                                   chunks_done=len(partials)))
             if len(partials) < len(chunks):
@@ -313,6 +338,7 @@ def run(semester, extract=extract_pdf, llm=call_openai, chunk_size=CHUNK_CHARS,
                 final = llm(PROMPT_MERGE.format(n=len(chunks),
                                                 body="\n\n---\n\n".join(partials), **ctx))
                 res["calls"] += 1
+                _add_usage(res, rec)
         except Exception as e:
             log("  ✖ %s — %s" % (fname, e))
             save_progress(wd, cid, dict(rec, status="failed", last_error=str(e)[:300]))
