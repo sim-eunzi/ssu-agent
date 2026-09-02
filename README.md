@@ -5,6 +5,10 @@
 
 **읽기 전용이다.** 동영상 자동 시청·진도 조작·과제 자동 제출은 하지 않는다 (핸드오프 §5).
 
+**전송도 하지 않는다.** 계산해서 stdout 으로 내놓기만 한다. 텔레그램은
+헤르메스봇 하나가 담당한다 — 전송 경로가 둘이면 "왜 두 번 왔지"를
+디버깅하게 된다. `eunzi-tools/bin/daily_router.py` 와 같은 구조다.
+
 ## 지금 되는 것 — M1
 
 | 모듈 | 하는 일 |
@@ -14,23 +18,34 @@
 | `sync.py` | 모듈·lessons·attendance_items·공지 수집 → `state/snapshot.json` |
 | `risk.py` | 잔여 영상 시간 ÷ 실제 가용 시간 → 🟢🟡🟠🔴 |
 | `events.py` | 스냅샷 diff → 마감 앞당겨짐 / D-3 신규 / 휴강·시험 공지 |
-| `notify.py` | 텔레그램 발신 전용. 아침·저녁·주간 브리핑 |
+| `brief.py` | 텍스트/JSON 렌더. 전송 없음 |
 
 ## 쓰기
 
 ```bash
-cp .env.example .env      # CANVAS_TOKEN, TELEGRAM_* 채우기
+cp .env.example .env      # CANVAS_TOKEN 채우기
 ./bin/ssu-agent doctor    # 환경 점검
 ./bin/ssu-agent auth      # 인증 체인 실측
-./bin/ssu-agent sync      # 수집 + 즉시 알림
+./bin/ssu-agent sync      # 수집 → state/snapshot.json
 ./bin/ssu-agent items 선형대수
-./bin/ssu-agent report morning
-./bin/ssu-agent notify weekly --refresh
+./bin/ssu-agent brief morning
 ```
 
-`--dry-run` 을 붙이면 발송 대신 표준출력으로 나온다.
-
 의존성 없음. venv 없이 시스템 `python3` 로 돈다 (3.8+).
+
+### 헤르메스봇이 받아가는 법
+
+```bash
+./bin/ssu-agent brief --json morning        # 구조화 출력
+./bin/ssu-agent brief --json --ack weekly   # 출력 후 outbox 비움
+```
+
+`text` 필드는 그대로 전송해도 되게 만들어 뒀다. 마크업은 붙이지 않는다 —
+HTML 이냐 Markdown 이냐는 보내는 쪽이 정할 일이다.
+
+`events` 는 "그 사이 바뀐 것"이다. **마감 앞당겨짐**이 여기 들어간다.
+Canvas 앱은 이걸 안 알려준다 — 기존 항목의 날짜 변경이라 새 푸시가 안 뜬다.
+전송에 성공하면 `--ack` 로 outbox 를 비운다. 실패하면 그대로 두면 다음에 다시 나온다.
 
 ## 테스트
 
@@ -45,11 +60,11 @@ python3 -m unittest discover -s tests -t .
 `study.py` 를 호출해야 하므로 **vault 가 있는 기기에서만** 돈다. 다른 기기 clone 금지.
 
 ```cron
-*/30 7-23  * * *  cd ~/ssu-agent && ./bin/ssu-agent sync   >> state/cron.log 2>&1
-30    7    * * *  cd ~/ssu-agent && ./bin/ssu-agent notify morning
-30    21   * * *  cd ~/ssu-agent && ./bin/ssu-agent notify evening
-0     10   * * 6  cd ~/ssu-agent && ./bin/ssu-agent notify weekly
+*/30 7-23  * * *  cd ~/ssu-agent && ./bin/ssu-agent sync >> state/cron.log 2>&1
 ```
+
+브리핑 시각(아침 07:30 / 저녁 21:30 / 토 10:00)은 **헤르메스봇이 정한다.**
+헤르메스봇이 `ssu-agent brief --json --ack <kind>` 를 부르면 된다.
 
 `sync` 는 완료된 강의 아이템을 이전 스냅샷에서 재사용해 요청 수를 줄인다.
 전부 다시 받으려면 `--full`.

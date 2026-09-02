@@ -198,6 +198,17 @@ ssu-agent/                       신규 repo (iMac)
 
 **`ssu-agent`는 vault에 직접 쓰지 않는다. `study.py`를 서브프로세스로 호출한다.**
 
+**알림도 직접 보내지 않는다.** 층이 이렇게 나뉜다.
+
+| 층 | 담당 | 이유 |
+|---|---|---|
+| 수집·판단 (잔여량·마감·사건 감지) | `ssu-agent` | LMS 도메인 지식이 여기 있다. 404 가 "안 봤다"라는 것, `everlec`이 영상이라는 것, 주차 `unlock_at` 폴백 |
+| 전달 (텔레그램) | 헤르메스봇 | 이미 아침 체크인을 하고 있다. 전송 경로는 하나 |
+| 즉시 알림 (새 공지·새 과제) | Canvas 앱 | 이미 푸시를 준다. 단 **마감 앞당겨짐은 안 알려준다** — 기존 항목의 날짜 변경이라 새 알림이 안 뜬다. 그래서 `events.py` 가 남아 있다 |
+
+인터페이스는 `ssu-agent brief --json` (stdout). 전송에 성공한 쪽이 `--ack` 로
+outbox 를 비운다.
+
 ---
 
 ## 4. 폐기된 안 (같은 길 반복 금지) ★
@@ -210,8 +221,9 @@ ssu-agent/                       신규 repo (iMac)
 | SQLite 별도 상태 저장소 | 변경 시에만 쓰므로 커밋 노이즈 없음. 이전 스냅샷 = `.md` 자체 | — |
 | vault에 `notes/` | 2026-08-26에 이미 폐기된 설계 | 커밋 `b1fdc0f` |
 | 새벽 4시 일괄 커밋 / `chore(lms):` / `pull --rebase` | `study.py`는 쓰기마다 즉시 commit+push, 🎓 접두어, `--no-rebase` | `study.py:415-442`, `:508` |
-| 텔레그램 양방향(버튼 체크) | 경합은 `getUpdates` 폴링에서만 난다. 헤르메스봇이 이미 폴링 중이므로 ssu-agent 는 `sendMessage` 만 쓴다. 쓰기 경로는 LMS 하나로 | — |
-| 헤르메스봇 코드에 통합 | 잘 도는 코드를 건드리는 비용이 더 큼. **봇 인스턴스는 공유, 코드는 분리** — 토큰·채팅방은 헤르메스봇 것을 그대로 쓴다 | — |
+| ssu-agent 가 직접 텔레그램 전송 | **전송 경로가 둘이면 "왜 두 번 왔지"를 디버깅하게 된다.** iMac 에 이미 아침 체크인·알림을 하는 봇이 있다. ssu-agent 는 계산해서 stdout 으로 내놓고 전송은 헤르메스봇이 한다 — `daily_router.py` 가 쓰는 것과 같은 구조 | `daily_router.py:14,432` |
+| 텔레그램 양방향(버튼 체크) | 쓰기 경로는 LMS 하나로. ssu-agent 는 애초에 텔레그램을 모른다 | — |
+| 헤르메스봇 코드에 통합 | 잘 도는 코드를 건드리는 비용이 더 큼. **판단은 ssu-agent, 전달은 헤르메스봇** — 층이 다르다 | — |
 | 헤드리스 브라우저 / SSO 자동 로그인 | §2.1 체인으로 불필요 | — |
 | 과목별 주차 오프셋 예외 테이블 | `seed_univ.py`가 이미 `week_offset` 보유 → drift 지점 생김 | — |
 | K-MOOC 어댑터 | 범위 밖으로 확정 | — |
@@ -233,11 +245,11 @@ ssu-agent/                       신규 repo (iMac)
 1. `canvas.py` — 인증 체인(§2.1), JWT 캐시(2h)
 2. `sync.py` — `lessons` + `attendance_items` 수집
 3. `risk.py` — 잔여량 ÷ 가용시간 (평일 1.5h, 주말 4h). `duration` 실측 사용
-4. `notify.py` — 텔레그램 **발신 전용** 새 봇
-   - 07:30 아침 / 21:30 저녁 / 토 10:00 주간
-   - 즉시 알림 3종만: 마감 앞당겨짐 · D-3 이내 신규 · 휴강/시험 공지
-   - 알림에 `html_url` 첨부 → 탭 한 번에 해당 강의 진입
-5. `state/notified.json` 중복 방지
+4. `brief.py` — 텍스트/JSON 렌더. **전송하지 않는다**
+   - `brief morning|evening|weekly` 텍스트, `--json` 구조화
+   - 감지 3종: 마감 앞당겨짐 · D-3 이내 신규 · 휴강/시험 공지
+   - 항목에 `html_url` 첨부 → 탭 한 번에 해당 강의 진입
+5. `state/notified.json` 중복 감지 방지 + `state/outbox.json` 미전달분
 
 폴링: `lessons` 30분 / `attendance_items` 하루 3회 (N+1이라 7과목×약40 = 280회)
 
@@ -272,8 +284,7 @@ Commons 다운로드 → `materials/`. mp4 → MLX Whisper → `summary.md`
 ```bash
 CANVAS_BASE=https://canvas.ssu.ac.kr
 CANVAS_TOKEN=      # 개인 액세스 토큰. 만료 2026-12-31
-TELEGRAM_TOKEN=    # 헤르메스봇과 동일 토큰 (발신 전용이라 경합 없음)
-TELEGRAM_CHAT_ID=  # 동일 채팅방
+# 텔레그램 설정 없음 — ssu-agent 는 전송하지 않는다 (§4)
 VAULT_PATH=/Users/eunzi/eunzi-os
 STUDY_PY=/Users/eunzi/eunzi-tools/bin/study.py
 ```

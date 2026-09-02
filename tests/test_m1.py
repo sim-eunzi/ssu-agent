@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from ssu_agent import events, net, notify, risk, sync          # noqa: E402
+from ssu_agent import brief, events, net, risk, sync            # noqa: E402
 from ssu_agent.config import KST, get                          # noqa: E402
 
 SAMPLES = os.path.join(ROOT, "docs", "samples")
@@ -332,7 +332,7 @@ class TestEvents(unittest.TestCase):
         self.assertEqual(events.unseen(got, {got[0]["key"]: "ts"}), [])
 
 
-class TestMessages(unittest.TestCase):
+class TestBrief(unittest.TestCase):
     def build(self):
         now = datetime(2026, 9, 7, 7, 30, tzinfo=KST)
         snap = {"courses": {"47738": {
@@ -347,23 +347,39 @@ class TestMessages(unittest.TestCase):
     def test_estimate_note_appears(self):
         a = self.build()
         a["total"]["unopened_count"] = 156
-        self.assertIn("156개", notify.morning(a))
+        self.assertIn("156개", brief.render(a, "morning"))
 
     def test_all_three_render(self):
         a = self.build()
-        for fn in (notify.morning, notify.evening, notify.weekly):
-            msg = fn(a)
-            self.assertIn("4차산업혁명과창업", msg)
-            self.assertLess(len(msg), notify.LIMIT)
+        for kind in ("morning", "evening", "weekly"):
+            self.assertIn("4차산업혁명과창업", brief.render(a, kind))
 
-    def test_html_is_escaped(self):
-        msg = notify.evening(self.build())
-        self.assertIn("&lt;1차시&gt;", msg)
-        self.assertIn("a=1&amp;b=2", msg)
+    def test_no_markup_and_no_escaping(self):
+        """마크업은 보내는 쪽이 정한다. 붙이지도, 이스케이프하지도 않는다.
 
-    def test_link_present(self):
-        self.assertIn('<a href="https://canvas.ssu.ac.kr/x?a=1&amp;b=2">',
-                      notify.evening(self.build()))
+        HTML 로 보낼지 Markdown 으로 보낼지 모르는 채로 이스케이프하면
+        받는 쪽이 되돌려야 한다. 제목은 원문 그대로 통과시킨다.
+        """
+        text = brief.render(self.build(), "evening")
+        self.assertIn("2주차 <1차시> & 실습", text)     # 원문 그대로
+        self.assertNotIn("&amp;", text)                # 이스케이프 안 함
+        self.assertNotIn("<a ", text)                  # 링크 태그 안 붙임
+        self.assertNotIn("<b>", text)
+
+    def test_events_appear_in_text(self):
+        ev = [{"type": "deadline_moved", "stem": "선형대수", "title": "2주차",
+               "from": "2026-09-20T14:59:59Z", "to": "2026-09-14T14:59:59Z"}]
+        text = brief.render(self.build(), "morning", ev)
+        self.assertIn("마감 앞당겨짐", text)
+        self.assertIn("선형대수", text)
+
+    def test_payload_shape(self):
+        p = brief.payload(self.build(), "weekly", [], {"semester": "2026-2"})
+        for k in ("generated_at", "kind", "text", "total", "courses",
+                  "overdue", "events"):
+            self.assertIn(k, p)
+        self.assertEqual(p["kind"], "weekly")
+        self.assertEqual(p["semester"], "2026-2")
 
 
 if __name__ == "__main__":

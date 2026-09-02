@@ -33,8 +33,6 @@ class Config:
         self.canvas_base = os.environ.get(
             "CANVAS_BASE", "https://canvas.ssu.ac.kr").rstrip("/")
         self.canvas_token = os.environ.get("CANVAS_TOKEN", "")
-        self.telegram_token = os.environ.get("TELEGRAM_TOKEN", "")
-        self.telegram_chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
         self.vault_path = os.environ.get("VAULT_PATH", "")
         self.study_py = os.environ.get("STUDY_PY", "")
 

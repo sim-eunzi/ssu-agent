@@ -18,12 +18,13 @@ def _path(name):
 
 def load(name, default=None):
     p = _path(name)
+    fallback = {} if default is None else default
     if not p.exists():
-        return default if default is not None else {}
+        return fallback
     try:
         return json.loads(p.read_text(encoding="utf-8"))
     except (ValueError, OSError):
-        return default if default is not None else {}
+        return fallback
 
 
 def save(name, obj):
@@ -66,6 +67,31 @@ def mark_notified(keys, store=None):
     store = {k: v for k, v in store.items() if v >= cutoff}
     save(NOTIFIED, store)
     return store
+
+
+# --- outbox.json --------------------------------------------------------
+# notified.json 은 '같은 사건을 두 번 잡지 않기' 위한 장부고,
+# outbox.json 은 '잡았지만 아직 전달되지 않은 것'이다. 전달은 헤르메스봇이
+# 하므로 여기서 지울 수 없다 — brief --ack 로 상대가 비운다.
+OUTBOX = "outbox.json"
+OUTBOX_MAX = 50
+
+
+def outbox_add(events):
+    box = load(OUTBOX, [])
+    seen = {e.get("key") for e in box}
+    box.extend(e for e in events if e.get("key") not in seen)
+    box = box[-OUTBOX_MAX:]
+    save(OUTBOX, box)
+    return box
+
+
+def outbox_peek():
+    return load(OUTBOX, [])
+
+
+def outbox_clear():
+    save(OUTBOX, [])
 
 
 # --- last_sync.json -----------------------------------------------------
