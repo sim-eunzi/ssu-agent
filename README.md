@@ -14,14 +14,22 @@
 | 마일스톤 | 상태 |
 |---|---|
 | **M1** 수집·판단 | ✅ 2026-09-02 완료. 7과목 실제 데이터로 검증 |
-| **M2** vault 반영 | ⛔ 차단 — [핸드오프 §7](docs/HANDOFF-ssu-agent.md) 판정 선행. **iMac 에서만 가능** |
+| **M2** vault 반영 | 🔓 **차단 해제 (2026-09-02).** 선행 조건이던 `study.py` 보강이 끝났다 — [핸드오프 §7](docs/HANDOFF-ssu-agent.md) |
 | **M3** 자료·요약 | 미착수 |
 | **M4** 시험 | 미착수 |
 
 M1 실측: 인증 1.4초 · 7과목 237항목 수집 14.5초 · 테스트 46건.
 
-**다음은 iMac 에서 이어야 한다.** `study.py` 도 vault 도 헤르메스봇도
-이 저장소를 만든 회사 맥북에는 없다. 핸드오프 §0.5 에 넘길 목록이 있다.
+**iMac 으로 넘어왔다 (2026-09-02).** `study.py` 보강 5건이 iMac 에서 구현·검증됐고
+M2 차단이 풀렸다 — `eunzi-tools` 커밋 `c37f2f4`·`a01fc84`, `study_test.sh` PASS 86.
+
+```bash
+study.py list <과목> [주차] --json     # vault 현재 상태 (기계 판독)
+study.py add ... --lock-timeout 30    # 멱등 · 주차 정렬 삽입 · 락 대기 초과 시 exit 3
+```
+
+`--json` 은 opt-in 이다. 플래그가 없으면 기존 출력이 한 글자도 안 바뀐다 —
+아침 체크인 cron 이 `study.py today` 출력을 그대로 붙여넣기 때문이다.
 
 ## 지금 되는 것 — M1
 
@@ -102,7 +110,7 @@ python3 -m unittest discover -s tests -t .
 
 ## 아직 안 한 것
 
-- **M2** vault 반영 — `study.py` 보강 3건 판정이 선행 (핸드오프 §7)
+- **M2** vault 반영 — 선행 조건 해소됨. `study_cli.py` 어댑터가 다음 작업
 - **M3** Commons 자료 다운로드 · Whisper 요약
 - **M4** study-coach 업로드
 - `progress` 필드 스케일 실측 — 아직 시청 이력이 0 이라 못 했다 (§10-5)
