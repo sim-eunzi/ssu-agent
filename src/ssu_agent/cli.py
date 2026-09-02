@@ -8,6 +8,7 @@
     ssu-agent items [과목]        남은 항목 나열
     ssu-agent vault-sync          Canvas 상태를 vault 에 반영 (study.py 경유)
     ssu-agent materials           PDF 자료 내려받기 + 주차 인덱스 갱신 (data/)
+    ssu-agent summarize           자료 → 마크다운 → LLM 요약 (--estimate 로 비용 먼저)
 
 **아무것도 전송하지 않는다.** 텔레그램은 헤르메스봇 하나가 담당한다.
 이 CLI 는 계산해서 stdout 으로 내놓기만 한다.
@@ -20,7 +21,7 @@ import time
 
 from . import brief as brief_mod
 from . import canvas as canvas_mod
-from . import events, materials, risk, state, study_cli, sync
+from . import events, materials, risk, state, study_cli, summarize, sync
 from .config import ROOT, get
 
 
@@ -181,6 +182,38 @@ def cmd_materials(a):
     return 0
 
 
+def cmd_summarize(a):
+    """자료 요약. --estimate 는 키 없이 돌아 비용만 어림한다."""
+    cfg = get()
+    sem = cfg.semester
+    if a.models:
+        try:
+            for m in summarize.list_models():
+                print("  " + m)
+        except Exception as e:                      # 인증 실패를 트레이스백으로 뱉지 않는다
+            raise SystemExit("모델 목록을 못 받았다 — %s: %s"
+                             % (type(e).__name__, str(e).split("\n")[0][:160]))
+        return 0
+    if a.estimate:
+        e = summarize.estimate(sem)
+        print("문서 {docs}개 · {chars:,}자 · 호출 {chunks}회 예상".format(**e))
+        print("  스캔 PDF {unsupported}개 제외 · 이미 된 것 {skipped}개".format(**e))
+        print("  입력 ~{est_input_tokens:,}토큰 · 출력 ~{est_output_tokens:,}토큰"
+              .format(**e))
+        print("  예상 ${est_usd} ({})  ※ 눈대중이다".format(summarize.MODEL, **e))
+        return 0
+    try:
+        res = summarize.run(sem, max_calls=a.limit)
+    except Exception as e:
+        raise SystemExit("요약 실패 — %s: %s"
+                         % (type(e).__name__, str(e).split("\n")[0][:160]))
+    print("요약 {done} · 건너뜀 {skipped} · 스캔 {unsupported} · 실패 {failed} "
+          "· 호출 {calls}회{}".format("  ⏸ 상한" if res["budget_hit"] else "", **res))
+    if res["budget_hit"]:
+        print("  남은 것은 .progress/ 에 있다 — 다음 실행이 이어받는다")
+    return 0
+
+
 # ---------------------------------------------------------------- main
 def build_parser():
     p = argparse.ArgumentParser(
@@ -218,6 +251,15 @@ def build_parser():
     ma.add_argument("--dry-run", action="store_true", help="받을 목록만 보인다")
     ma.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
     ma.set_defaults(func=cmd_materials)
+
+    su = sub.add_parser("summarize")
+    su.add_argument("--models", action="store_true",
+                    help="이 키로 쓸 수 있는 모델 목록")
+    su.add_argument("--estimate", action="store_true",
+                    help="키 없이 문자·토큰·예상비용만 낸다")
+    su.add_argument("--limit", type=int, default=summarize.MAX_CALLS,
+                    help="이번 실행의 LLM 호출 상한 (기본 %d)" % summarize.MAX_CALLS)
+    su.set_defaults(func=cmd_summarize)
 
     it = sub.add_parser("items")
     it.add_argument("course", nargs="?", help="vault stem 또는 Canvas ID")
