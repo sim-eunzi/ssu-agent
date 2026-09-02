@@ -1,0 +1,40 @@
+{
+  "semester": "2026-2",
+  "term_start": "2026-09-01",
+  "term_end": "2026-12-28",
+  "timezone": "Asia/Seoul",
+
+  "_comment": "key 는 vault 파일 stem 이 1순위 (study.py:352 / lib/vault.js:523). frontmatter course: 는 폴백.",
+  "courses": [
+    { "canvas_id": 48130, "stem": "현대사회이슈와기독교",   "mode": "async" },
+    { "canvas_id": 47738, "stem": "4차산업혁명과창업",       "mode": "async" },
+    { "canvas_id": 48462, "stem": "선형대수",               "mode": "hybrid" },
+    { "canvas_id": 47737, "stem": "정치철학-한나아렌트",     "mode": "async" },
+    { "canvas_id": 47762, "stem": "창의융합인재되기-3code", "mode": "async" },
+    { "canvas_id": 49791, "stem": "한반도평화와통일",       "mode": "async" },
+    { "canvas_id": 48466, "stem": "확장현실디자인",         "mode": "hybrid" }
+  ],
+
+  "_excluded_comment": "잔여 등록·채플. 참고용으로만 남긴다.",
+  "excluded": [
+    { "canvas_id": 18304, "why": "2022 원격수업 설문" },
+    { "canvas_id": 14362, "why": "코로나 자가신고" },
+    { "canvas_id": 48096, "why": "비전채플" }
+  ],
+
+  "_out_of_scope_comment": "Canvas 에 없음. study.py 수동 유지. 에이전트 대상 아님.",
+  "out_of_scope": ["kmooc-언어학입문", "kmooc-현대철학사조", "카뮈-이방인"],
+
+  "availability": {
+    "_comment": "risk.py 가용시간(시간/일). 0=월 .. 6=일",
+    "weekday_hours": 1.5,
+    "weekend_hours": 4.0
+  },
+
+  "notify": {
+    "morning": "07:30",
+    "evening": "21:30",
+    "weekly": "SAT 10:00",
+    "soon_days": 3
+  }
+}

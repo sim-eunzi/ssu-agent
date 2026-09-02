@@ -1,0 +1,770 @@
+[
+  {
+    "id": 916917,
+    "name": "1주차",
+    "position": 1,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-08-26T00:58:02Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916917/items",
+    "items": [
+      {
+        "id": 3361405,
+        "title": "1주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916917,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361405",
+        "content_id": 47138,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47138",
+        "content_details": {
+          "due_at": "2026-09-14T14:59:00Z",
+          "unlock_at": "2026-08-31T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3361406,
+        "title": "확장현실디자인 1주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916917,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361406",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F640796",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/640796",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916918,
+    "name": "2주차",
+    "position": 2,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:45Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916918/items",
+    "items": [
+      {
+        "id": 3361408,
+        "title": "2주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916918,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361408",
+        "content_id": 47131,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47131",
+        "content_details": {
+          "due_at": "2026-09-14T14:59:00Z",
+          "unlock_at": "2026-09-07T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-09-07T15:00:00Z",
+            "asset_string": "quizzes:quiz_47131"
+          },
+          "lock_explanation": "이 퀴즈는 9월 8일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361409,
+        "title": "확장현실디자인 2주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916918,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361409",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F647013",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/647013",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916919,
+    "name": "3주차",
+    "position": 3,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:45Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916919/items",
+    "items": [
+      {
+        "id": 3361410,
+        "title": "3주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916919,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361410",
+        "content_id": 47130,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47130",
+        "content_details": {
+          "due_at": "2026-09-21T14:59:00Z",
+          "unlock_at": "2026-09-14T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-09-14T15:00:00Z",
+            "asset_string": "quizzes:quiz_47130"
+          },
+          "lock_explanation": "이 퀴즈는 9월 15일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361411,
+        "title": "확장현실디자인 3주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916919,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361411",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F658177",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/658177",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916920,
+    "name": "4주차",
+    "position": 4,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:45Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916920/items",
+    "items": [
+      {
+        "id": 3361412,
+        "title": "4주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916920,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361412",
+        "content_id": 47128,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47128",
+        "content_details": {
+          "due_at": "2026-09-28T14:59:00Z",
+          "unlock_at": "2026-09-21T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-09-21T15:00:00Z",
+            "asset_string": "quizzes:quiz_47128"
+          },
+          "lock_explanation": "이 퀴즈는 9월 22일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361413,
+        "title": "확장현실디자인 4주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916920,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361413",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F666431",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/666431",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916921,
+    "name": "5주차",
+    "position": 5,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:45Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916921/items",
+    "items": [
+      {
+        "id": 3361414,
+        "title": "5주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916921,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361414",
+        "content_id": 47140,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47140",
+        "content_details": {
+          "due_at": "2026-10-05T14:59:00Z",
+          "unlock_at": "2026-09-28T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-09-28T15:00:00Z",
+            "asset_string": "quizzes:quiz_47140"
+          },
+          "lock_explanation": "이 퀴즈는 9월 29일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361415,
+        "title": "확장현실디자인 5주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916921,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361415",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F681095",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/681095",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916922,
+    "name": "6주차",
+    "position": 6,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:45Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916922/items",
+    "items": [
+      {
+        "id": 3361416,
+        "title": "6주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916922,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361416",
+        "content_id": 47135,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47135",
+        "content_details": {
+          "due_at": "2026-10-12T14:59:00Z",
+          "unlock_at": "2026-10-05T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-10-05T15:00:00Z",
+            "asset_string": "quizzes:quiz_47135"
+          },
+          "lock_explanation": "이 퀴즈는 10월 6일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361417,
+        "title": "확장현실디자인 6주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916922,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361417",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F683296",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/683296",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916923,
+    "name": "7주차",
+    "position": 7,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916923/items",
+    "items": [
+      {
+        "id": 3361418,
+        "title": "7주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916923,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361418",
+        "content_id": 47134,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47134",
+        "content_details": {
+          "due_at": "2026-10-19T14:59:00Z",
+          "unlock_at": "2026-10-12T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-10-12T15:00:00Z",
+            "asset_string": "quizzes:quiz_47134"
+          },
+          "lock_explanation": "이 퀴즈는 10월 13일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361419,
+        "title": "확장현실디자인 7주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916923,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361419",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F684235",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/684235",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916962,
+    "name": "8주차",
+    "position": 8,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 1,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916962/items",
+    "items": [
+      {
+        "id": 3361423,
+        "title": "확장현실디자인 8주차",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916962,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361423",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F744460",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/744460",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916924,
+    "name": "9주차",
+    "position": 10,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916924/items",
+    "items": [
+      {
+        "id": 3361420,
+        "title": "확장현실디자인 9주차",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916924,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361420",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F693883",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/693883",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3361421,
+        "title": "9주차 퀴즈",
+        "position": 2,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916924,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361421",
+        "content_id": 47139,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47139",
+        "content_details": {
+          "due_at": "2026-11-02T14:59:00Z",
+          "unlock_at": "2026-10-26T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-10-26T15:00:00Z",
+            "asset_string": "quizzes:quiz_47139"
+          },
+          "lock_explanation": "이 퀴즈는 10월 27일 오전 12:00까지 잠겨 있습니다."
+        }
+      }
+    ]
+  },
+  {
+    "id": 916926,
+    "name": "10주차",
+    "position": 11,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916926/items",
+    "items": [
+      {
+        "id": 3361424,
+        "title": "10주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916926,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361424",
+        "content_id": 47137,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47137",
+        "content_details": {
+          "due_at": "2026-11-09T14:59:00Z",
+          "unlock_at": "2026-11-02T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-11-02T15:00:00Z",
+            "asset_string": "quizzes:quiz_47137"
+          },
+          "lock_explanation": "이 퀴즈는 11월 3일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361425,
+        "title": "확장현실디자인 10주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916926,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361425",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F703508",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/703508",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916927,
+    "name": "11주차",
+    "position": 12,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916927/items",
+    "items": [
+      {
+        "id": 3361426,
+        "title": "11주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916927,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361426",
+        "content_id": 47133,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47133",
+        "content_details": {
+          "due_at": "2026-11-16T14:59:00Z",
+          "unlock_at": "2026-11-09T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-11-09T15:00:00Z",
+            "asset_string": "quizzes:quiz_47133"
+          },
+          "lock_explanation": "이 퀴즈는 11월 10일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361427,
+        "title": "확장현실디자인 11주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916927,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361427",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F714902",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/714902",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916928,
+    "name": "12주차",
+    "position": 13,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916928/items",
+    "items": [
+      {
+        "id": 3361428,
+        "title": "확장현실디자인 12주차",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916928,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361428",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F721727",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/721727",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3361429,
+        "title": "12주차 퀴즈",
+        "position": 2,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916928,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361429",
+        "content_id": 47136,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47136",
+        "content_details": {
+          "due_at": "2026-11-23T14:59:00Z",
+          "unlock_at": "2026-11-16T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-11-16T15:00:00Z",
+            "asset_string": "quizzes:quiz_47136"
+          },
+          "lock_explanation": "이 퀴즈는 11월 17일 오전 12:00까지 잠겨 있습니다."
+        }
+      }
+    ]
+  },
+  {
+    "id": 916929,
+    "name": "13주차",
+    "position": 14,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916929/items",
+    "items": [
+      {
+        "id": 3361430,
+        "title": "13주차 퀴즈",
+        "position": 1,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916929,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361430",
+        "content_id": 47142,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47142",
+        "content_details": {
+          "due_at": "2026-11-30T14:59:00Z",
+          "unlock_at": "2026-11-23T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-11-23T15:00:00Z",
+            "asset_string": "quizzes:quiz_47142"
+          },
+          "lock_explanation": "이 퀴즈는 11월 24일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361431,
+        "title": "확장현실디자인 13주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916929,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361431",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F729289",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/729289",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 916930,
+    "name": "14주차",
+    "position": 15,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916930/items",
+    "items": [
+      {
+        "id": 3361433,
+        "title": "확장현실디자인 14주차",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916930,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361433",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F736104",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/736104",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3361434,
+        "title": "14주차 퀴즈",
+        "position": 3,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916930,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361434",
+        "content_id": 47129,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47129",
+        "content_details": {
+          "due_at": "2026-12-07T14:59:00Z",
+          "unlock_at": "2026-11-30T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-11-30T15:00:00Z",
+            "asset_string": "quizzes:quiz_47129"
+          },
+          "lock_explanation": "이 퀴즈는 12월 1일 오전 12:00까지 잠겨 있습니다."
+        }
+      }
+    ]
+  },
+  {
+    "id": 916931,
+    "name": "15주차",
+    "position": 16,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:46Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/modules/916931/items",
+    "items": [
+      {
+        "id": 3361436,
+        "title": "15주차 퀴즈",
+        "position": 2,
+        "indent": 0,
+        "type": "Quiz",
+        "module_id": 916931,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361436",
+        "content_id": 47132,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/quizzes/47132",
+        "content_details": {
+          "due_at": "2026-12-14T14:59:00Z",
+          "unlock_at": "2026-12-07T15:00:00Z",
+          "points_possible": 5.0,
+          "locked_for_user": true,
+          "lock_info": {
+            "unlock_at": "2026-12-07T15:00:00Z",
+            "asset_string": "quizzes:quiz_47132"
+          },
+          "lock_explanation": "이 퀴즈는 12월 8일 오전 12:00까지 잠겨 있습니다."
+        }
+      },
+      {
+        "id": 3361437,
+        "title": "확장현실디자인 15주차",
+        "position": 3,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 916931,
+        "html_url": "https://canvas.ssu.ac.kr/courses/48466/modules/items/3361437",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/48466/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F740687",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/740687",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  }
+]

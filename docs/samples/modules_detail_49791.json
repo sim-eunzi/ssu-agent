@@ -1,0 +1,819 @@
+[
+  {
+    "id": 911335,
+    "name": "1주차",
+    "position": 2,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-08-28T08:46:30Z",
+    "items_count": 4,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911335/items",
+    "items": [
+      {
+        "id": 3369892,
+        "title": "2026년 2학기 한반도평화와통일 03반(2022학번 이상 및 23 24 25학번 스쿨 이수 학생 대상)OT자료",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911335,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369892",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F908658",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/908658",
+        "new_tab": null,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369891,
+        "title": "2026-2 한반도평화와통일 오리엔테이션 03반 !!!",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911335,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369891",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F908657",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/908657",
+        "new_tab": null,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369812,
+        "title": "2026년 제1강 통일을 위해 우리는 무엇을 준비할까?",
+        "position": 3,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911335,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369812",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906417",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906417",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369813,
+        "title": "2026 SSU_PPT_1",
+        "position": 4,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911335,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369813",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906425",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906425",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911336,
+    "name": "2주차",
+    "position": 4,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911336/items",
+    "items": [
+      {
+        "id": 3369814,
+        "title": "2026 제2강 남북관계 역사와 현실 1 해방부터 1960년대",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911336,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369814",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906418",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906418",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369815,
+        "title": "2026 SSU_PPT_2",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911336,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369815",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906459",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906459",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911337,
+    "name": "3주차",
+    "position": 6,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911337/items",
+    "items": [
+      {
+        "id": 3369816,
+        "title": "2026 제3강 남북관계의 역사와 현실2 1970-1980년대 남북관계",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911337,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369816",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906419",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906419",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369817,
+        "title": "2026 SSU_PPT_3",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911337,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369817",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906460",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906460",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911338,
+    "name": "4주차",
+    "position": 8,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911338/items",
+    "items": [
+      {
+        "id": 3369818,
+        "title": "2026년 제4강 남북관계역서와 현실 1990년대 이후",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911338,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369818",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906420",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906420",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369819,
+        "title": "2026 SSU_PPT_4",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911338,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369819",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906461",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906461",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911339,
+    "name": "5주차",
+    "position": 10,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911339/items",
+    "items": [
+      {
+        "id": 3369820,
+        "title": "2026 제5강 해외분단과 갈등, 통일 그리고 사람과의 통합",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911339,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369820",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906421",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906421",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369821,
+        "title": "2026 SSU_PPT_5",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911339,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369821",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906462",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906462",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911340,
+    "name": "6주차",
+    "position": 12,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911340/items",
+    "items": [
+      {
+        "id": 3369822,
+        "title": "2026 제6강 북한주민의 일상에 영향을 준 정치적 사건",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911340,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369822",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F908540",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/908540",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369823,
+        "title": "2026 SSU_PPT_6",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911340,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369823",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906463",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906463",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911341,
+    "name": "7주차",
+    "position": 14,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911341/items",
+    "items": [
+      {
+        "id": 3369824,
+        "title": "2026 제7강 북한주민의 삶1 북한주민의 교육제도 및 학교 생활",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911341,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369824",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906423",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906423",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369825,
+        "title": "2026 SSU_PPT_7",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911341,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369825",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906464",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906464",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911342,
+    "name": "8주차",
+    "position": 16,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911342/items",
+    "items": [
+      {
+        "id": 3369826,
+        "title": "2026 제8강 북한주민의 삶2 조직생활과 통제, 일상의 변화",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911342,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369826",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906424",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906424",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369827,
+        "title": "2026 SSU_PPT_8",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911342,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369827",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906465",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906465",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911343,
+    "name": "9주차",
+    "position": 18,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911343/items",
+    "items": [
+      {
+        "id": 3369828,
+        "title": "북한, 개성공단 이야기",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911343,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369828",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906475",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906475",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369829,
+        "title": "북한의 그림 도슨트",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911343,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369829",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906558",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906558",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911344,
+    "name": "10주차",
+    "position": 20,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 3,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911344/items",
+    "items": [
+      {
+        "id": 3369830,
+        "title": "북한판 디즈니?",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911344,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369830",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906476",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906476",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369831,
+        "title": "북한도 과대광고를?",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911344,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369831",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906477",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906477",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369832,
+        "title": "NKPOP차트",
+        "position": 3,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911344,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369832",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906478",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906478",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911345,
+    "name": "11주차",
+    "position": 22,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 3,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911345/items",
+    "items": [
+      {
+        "id": 3369833,
+        "title": "북한에 있는 한국영화 평론가",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911345,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369833",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906480",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906480",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369834,
+        "title": "북한의 베스트셀러?",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911345,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369834",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906482",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906482",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369835,
+        "title": "대동강맥주와 평양소주",
+        "position": 3,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911345,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369835",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906559",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906559",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911346,
+    "name": "12주차",
+    "position": 24,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 4,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911346/items",
+    "items": [
+      {
+        "id": 3369836,
+        "title": "생활북한어1. 밤을 패다",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911346,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369836",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906484",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906484",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369837,
+        "title": "생활북한어2. 정말 안됐습니다.",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911346,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369837",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906485",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906485",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369838,
+        "title": "생활북한어3. 전화를 놓겠어요.",
+        "position": 3,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911346,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369838",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906486",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906486",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369839,
+        "title": "랜선투어 IN 평양 핫플레이스",
+        "position": 4,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911346,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369839",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906561",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906561",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911347,
+    "name": "13주차",
+    "position": 26,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 3,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911347/items",
+    "items": [
+      {
+        "id": 3369840,
+        "title": "북한에서 내집 마련",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911347,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369840",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906487",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906487",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369841,
+        "title": "스마트한 북한생활",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911347,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369841",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906488",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906488",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369842,
+        "title": "북한NEWS 8",
+        "position": 3,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911347,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369842",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906560",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906560",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911348,
+    "name": "14주차",
+    "position": 28,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911348/items",
+    "items": [
+      {
+        "id": 3369843,
+        "title": "아이러니플레이스 in 여수 1. 여순사건의 개요",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911348,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369843",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906490",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906490",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369844,
+        "title": "아이러니플레이스 in 여수 2. 14연대 주둔지와 인구부전투지",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911348,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369844",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906491",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906491",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  },
+  {
+    "id": 911349,
+    "name": "15주차",
+    "position": 30,
+    "unlock_at": null,
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2026-09-02T01:53:44Z",
+    "items_count": 2,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/modules/911349/items",
+    "items": [
+      {
+        "id": 3369845,
+        "title": "아이러니플레이스 in 여수 3. 인민대회 장소와 종산 국민학교",
+        "position": 1,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911349,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369845",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906492",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906492",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      },
+      {
+        "id": 3369846,
+        "title": "아이러니플레이스 in 여수 4. 마래터널, 형제묘 여순사건위령비",
+        "position": 2,
+        "indent": 0,
+        "type": "ExternalTool",
+        "module_id": 911349,
+        "html_url": "https://canvas.ssu.ac.kr/courses/49791/modules/items/3369846",
+        "content_id": 73,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/49791/external_tools/sessionless_launch?id=73&url=https%3A%2F%2Fcanvas.ssu.ac.kr%2Flearningx%2Flti%2Flecture_attendance%2Fitems%2Fview%2F906493",
+        "external_url": "https://canvas.ssu.ac.kr/learningx/lti/lecture_attendance/items/view/906493",
+        "new_tab": false,
+        "content_details": {
+          "locked_for_user": false
+        }
+      }
+    ]
+  }
+]

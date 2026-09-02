@@ -1,0 +1,44 @@
+[
+  {
+    "id": 235926,
+    "name": "코로나19 확진 자가 신고",
+    "position": 1,
+    "unlock_at": "2022-02-22T15:00:59Z",
+    "require_sequential_progress": false,
+    "publish_final_grade": false,
+    "prerequisite_module_ids": [],
+    "state": "completed",
+    "completed_at": "2022-03-02T15:42:55Z",
+    "items_count": 3,
+    "items_url": "https://canvas.ssu.ac.kr/api/v1/courses/14362/modules/235926/items",
+    "items": [
+      {
+        "id": 1205266,
+        "title": "아래의 설문을 참여(클릭)하여 신고하시기 바랍니다",
+        "position": 1,
+        "indent": 0,
+        "type": "SubHeader",
+        "module_id": 235926
+      },
+      {
+        "id": 2660920,
+        "title": "페이지",
+        "position": 2,
+        "indent": 1,
+        "type": "SubHeader",
+        "module_id": 235926
+      },
+      {
+        "id": 1453147,
+        "title": "코로나19 확진 자가 신고",
+        "position": 3,
+        "indent": 2,
+        "type": "Quiz",
+        "module_id": 235926,
+        "html_url": "https://canvas.ssu.ac.kr/courses/14362/modules/items/1453147",
+        "content_id": 10934,
+        "url": "https://canvas.ssu.ac.kr/api/v1/courses/14362/quizzes/10934"
+      }
+    ]
+  }
+]

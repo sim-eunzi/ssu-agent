@@ -1,0 +1,14 @@
+# 비밀
+.env
+
+# 런타임 상태
+state/*.json
+!state/.gitkeep
+
+# 자료 캐시 (저작물)
+data/**/materials/
+
+# python
+__pycache__/
+*.pyc
+.venv/
