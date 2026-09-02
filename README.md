@@ -127,6 +127,12 @@ tail -f state/cron.log
 ## 아직 안 한 것
 
 - **동영상 요약** — `faster-whisper` 전사 → 같은 LLM 경로. 추출 함수만 붙이면 된다
+- **PPT·ZIP** — 실측 2026-09-02, 개봉 자료 81개 중 비(非)PDF 는 **1건**이다
+  (선형대수 W1 `강의자료ppt.zip`, `content_type: file`). Commons `content.php` 가
+  **`Not Supported Content Type`** 을 돌려줘 `content_download_uri` 가 아예 없다 —
+  **변환 이전에 다운로드가 막혀 있다.** 뚫으려면 Canvas Files API 정찰 + LibreOffice
+  설치가 필요한데, 표본 1건으로 규칙을 세우면 대개 틀린다. 미개봉 222개가 열려
+  건수를 보고 정한다. 사유는 `state/materials_skipped.json` 에 남는다
 - **스캔 PDF** — 4차산업 자료 2개는 텍스트 레이어가 없다(`unsupported_scanned`). 비전 모델은 건당 $1~2 라 보류
 - **헤르메스봇에 `brief` 위험도 배선** — 마감 요약(`study.py due`)은 2026-09-02 아침 체크인에 붙었다. 밀린 영상 시간은 아직
 - **M4** study-coach 업로드

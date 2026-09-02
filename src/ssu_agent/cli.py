@@ -173,12 +173,20 @@ def cmd_materials(a):
                               dry_run=a.dry_run)
     print("주차 인덱스 {}개 갱신 (대시보드가 읽는 meta.json)".format(n))
     pend = materials.not_ready(snap)
-    if pend:
-        print("아직 공개 전 {}건 — 주차가 풀리면 받는다 (실패 아님)".format(len(pend)))
-        for x in pend[:5]:
+    if not a.dry_run:
+        # stdout 은 cron 로그에 묻힌다. 사유는 파일로 남겨야 이어받는다.
+        materials.write_skipped(snap, str(state._path("materials_skipped.json")))
+    by = {}
+    for x in pend:
+        by.setdefault(x["reason"], []).append(x)
+    LABEL = {"not_open": "아직 공개 전 — 주차가 풀리면 받는다",
+             "unsupported_type": "PDF 가 아니라 못 받는다 (Commons 뷰어 밖)"}
+    for reason, xs in sorted(by.items()):
+        print("{} {}건 (실패 아님)".format(LABEL.get(reason, reason), len(xs)))
+        for x in xs[:4]:
             print("    {stem} W{week:02d} {file}".format(**x))
-        if len(pend) > 5:
-            print("    … 외 {}건".format(len(pend) - 5))
+        if len(xs) > 4:
+            print("    … 외 {}건".format(len(xs) - 4))
     return 0
 
 

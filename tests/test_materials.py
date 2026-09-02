@@ -104,6 +104,23 @@ class NotReady(unittest.TestCase):
     def test_movies_are_not_counted(self):
         self.assertEqual(m.not_ready(snap([item(ctype="movie", vid="")])), [])
 
+    def test_reason_is_recorded(self):
+        nr = m.not_ready(snap([item(week=2, vid="")]))
+        self.assertEqual(nr[0]["reason"], "not_open",
+                         "파일은 올라왔는데 콘텐츠가 아직 잠긴 것")
+
+    def test_zip_and_ppt_are_recorded_as_unsupported(self):
+        """실측 2026-09-02 — 선형대수 1주차 '강의자료ppt.zip'(content_type: file).
+        Commons 뷰어가 'Not Supported Content Type' 을 돌려줘 다운로드 경로가
+        아예 없다. PPT→PDF 변환 이전에 받는 것부터 막혀 있다."""
+        nr = m.not_ready(snap([item(ctype="file", name="강의자료ppt.zip")]))
+        self.assertEqual(len(nr), 1)
+        self.assertEqual(nr[0]["reason"], "unsupported_type")
+        self.assertEqual(nr[0]["content_type"], "file")
+
+    def test_pdf_with_view_url_is_not_listed(self):
+        self.assertEqual(m.not_ready(snap([item()])), [], "받을 수 있는 건 안 센다")
+
 
 class Idempotence(unittest.TestCase):
     def test_known_content_id_is_skipped(self):
@@ -249,3 +266,36 @@ class WeekIndex(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SkippedLedger(unittest.TestCase):
+    """못 받은 것은 **파일로** 남아야 다음 세션이 이어받는다.
+    stdout 은 cron 로그로 흘러가 버린다."""
+
+    def test_write_skipped_groups_by_reason(self):
+        import json, tempfile, os
+        snap = {"courses": {"1": {"stem": "선형대수", "items": [
+            {"kind": "lecture", "week": 1, "content_type": "file",
+             "file_name": "강의자료ppt.zip", "total_file_size": 64238},
+            {"kind": "lecture", "week": 2, "content_type": "pdf",
+             "file_name": "2주차.pdf",
+             "item_content_data": {"content_id": "not_open"}},
+        ]}}}
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "s.json")
+            m.write_skipped(snap, out)
+            got = json.loads(open(out, encoding="utf-8").read())
+        self.assertEqual(got["counts"], {"not_open": 1, "unsupported_type": 1})
+        self.assertIn("fetched_at", got)
+        zip_row = [x for x in got["items"] if x["reason"] == "unsupported_type"][0]
+        self.assertEqual(zip_row["file"], "강의자료ppt.zip")
+        self.assertIn("Commons", got["notes"]["unsupported_type"])
+
+    def test_write_skipped_is_empty_when_all_downloadable(self):
+        import json, tempfile, os
+        snap = snap_ok = {"courses": {"1": {"stem": "x", "items": [item()]}}}
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "s.json")
+            m.write_skipped(snap_ok, out)
+            got = json.loads(open(out, encoding="utf-8").read())
+        self.assertEqual(got["counts"], {})

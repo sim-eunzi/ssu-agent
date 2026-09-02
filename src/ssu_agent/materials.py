@@ -75,27 +75,79 @@ def plan(snap):
     return jobs
 
 
-def not_ready(snap):
-    """PDF 인데 아직 못 받는 것. **실패가 아니다.**
+# 받을 수 있는 형식. 나머지는 not_ready 가 이유와 함께 기록한다.
+DOWNLOADABLE = ("pdf",)
+# 애초에 자료가 아닌 것 — 셀 이유가 없다.
+IGNORED_TYPES = ("movie", "everlec")
 
-    `item_content_data.content_id` 가 `'not_open'` 이면 파일은 올라와 있어도
-    뷰어 URL 이 안 나온다 — 교수가 콘텐츠를 아직 공개하지 않은 상태다.
-    미개봉(404)과는 다른 축이다: 항목은 열렸지만 콘텐츠가 잠겨 있다.
-    실측 2026-09-02 — 개봉 PDF 19개 중 14개가 여기 해당했다.
-    주차가 풀리면 다음 실행에서 자연히 받힌다.
+
+SKIP_NOTES = {
+    "not_open": "교수가 콘텐츠를 아직 공개 안 함. 주차가 풀리면 다음 실행에서 받힌다. "
+                "할 일 없음.",
+    "unsupported_type": "PDF 가 아니라 Commons 뷰어(content.php)가 "
+                        "'Not Supported Content Type' 을 돌려준다 — "
+                        "content_download_uri 자체가 없어 **받는 것부터 막힌다**. "
+                        "PPT→PDF 변환은 그 다음 문제다. 뚫으려면 Canvas Files API "
+                        "정찰 + LibreOffice(soffice) 설치가 필요하다. "
+                        "실측 2026-09-02 표본 1건(선형대수 W1 강의자료ppt.zip)이라 "
+                        "지금은 기록만 한다. 주차가 열려 건수를 보고 정한다.",
+}
+
+
+def write_skipped(snap, path):
+    """못 받은 자료를 사유별로 파일에 남긴다.
+
+    stdout 은 cron 로그로 흘러가 묻힌다. 다음 세션이 "무엇이 왜 빠졌나"를
+    다시 정찰하지 않으려면 파일이어야 한다. `summarize` 의 재개 장부와 같은 뜻이다.
+    """
+    items = not_ready(snap)
+    counts = {}
+    for x in items:
+        counts[x["reason"]] = counts.get(x["reason"], 0) + 1
+    doc = {"fetched_at": snap.get("fetched_at"),
+           "counts": counts, "items": items,
+           "notes": {r: SKIP_NOTES.get(r, "") for r in counts}}
+    d = os.path.dirname(path)
+    if d:
+        os.makedirs(d, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(doc, f, ensure_ascii=False, indent=2, sort_keys=True)
+    return doc
+
+
+def not_ready(snap):
+    """자료인데 아직 못 받는 것. **실패가 아니다.** 이유를 같이 남긴다.
+
+    `not_open` — `item_content_data.content_id` 가 `'not_open'` 이면 파일은
+    올라와 있어도 뷰어 URL 이 안 나온다. 교수가 콘텐츠를 아직 공개하지 않은
+    상태다. 미개봉(404)과는 다른 축이다 — 항목은 열렸지만 콘텐츠가 잠겨 있다.
+    실측 2026-09-02: 개봉 PDF 19개 중 14개. 주차가 풀리면 자연히 받힌다.
+
+    `unsupported_type` — PDF 가 아닌 자료. 실측 2026-09-02 에 선형대수 1주차
+    `강의자료ppt.zip`(content_type: `file`) 하나가 있었는데, Commons 뷰어가
+    **"Not Supported Content Type"** 을 돌려줘 `content_download_uri` 자체가
+    없었다. **PPT→PDF 변환 이전에 받는 것부터 막혀 있다** — 뚫으려면 Canvas
+    Files API 정찰이 따로 필요하고 LibreOffice 도 있어야 한다.
+    표본이 1건이라 지금은 기록만 한다. 주차가 열려 몇 건인지 보고 정한다.
     """
     out = []
     for _cid, e in sorted((snap.get("courses") or {}).items()):
         for it in e.get("items") or []:
             if it.get("kind") != "lecture" or it.get("unopened"):
                 continue
-            if (it.get("content_type") or "").lower() != "pdf":
+            ct = (it.get("content_type") or "").lower()
+            if not ct or ct in IGNORED_TYPES:
                 continue
-            if content_id_of(it):
-                continue
+            if ct not in DOWNLOADABLE:
+                reason = "unsupported_type"
+            elif content_id_of(it):
+                continue                    # 받을 수 있다
+            else:
+                reason = "not_open"
             out.append({"stem": e.get("stem"), "week": it.get("week"),
                         "file": it.get("file_name") or "(이름 없음)",
-                        "size": it.get("total_file_size")})
+                        "size": it.get("total_file_size"),
+                        "content_type": ct, "reason": reason})
     return out
 
 
