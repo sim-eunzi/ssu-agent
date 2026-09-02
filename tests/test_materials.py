@@ -191,5 +191,61 @@ class Run(unittest.TestCase):
             self.assertEqual(list(pathlib.Path(tmp).iterdir()), [])
 
 
+class WeekIndex(unittest.TestCase):
+    """대시보드가 읽을 계약. snapshot 직독 대신 meta.json 을 인터페이스로 둔다 —
+    대시보드가 ssu-agent 내부 구조에 결합되지 않게."""
+
+    def _snap(self, items):
+        s = snap(items)
+        s["courses"]["1"]["items"] = items
+        return s
+
+    def test_makes_meta_for_every_week_with_items(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(m, "DATA_DIR", pathlib.Path(tmp)):
+                n = m.write_index(self._snap([item(week=1), item(week=3, vid="")]),
+                                  "2026-2")
+            self.assertEqual(n, 2)
+            for w in ("W01", "W03"):
+                self.assertTrue((pathlib.Path(tmp) / "2026-2" / "선형대수" / w
+                                 / "meta.json").exists())
+
+    def test_links_carry_url_and_title(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(m, "DATA_DIR", pathlib.Path(tmp)):
+                m.write_index(self._snap([dict(item(week=1, title="선대_1_1"),
+                                               html_url="https://x/1")]), "2026-2")
+                d = json.loads((pathlib.Path(tmp) / "2026-2" / "선형대수" / "W01"
+                                / "meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(d["course"], "선형대수")
+            self.assertEqual(d["links"][0]["url"], "https://x/1")
+            self.assertEqual(d["links"][0]["title"], "선대_1_1")
+            self.assertEqual(d["links"][0]["kind"], "lecture")
+
+    def test_preserves_download_ledger(self):
+        """자료 장부를 덮으면 멱등이 깨져 이미 받은 걸 다시 받는다."""
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(m, "DATA_DIR", pathlib.Path(tmp)):
+                d = m.week_dir("2026-2", "선형대수", 1)
+                m.save_meta(d, {"items": {"abc": {"file": "x.pdf"}}})
+                m.write_index(self._snap([item(week=1)]), "2026-2")
+                got = m.load_meta(d)
+            self.assertIn("abc", got["items"])
+            self.assertIn("links", got)
+
+    def test_item_without_week_is_dropped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(m, "DATA_DIR", pathlib.Path(tmp)):
+                self.assertEqual(m.write_index(self._snap([item(week=None)]),
+                                               "2026-2"), 0)
+                self.assertEqual(list(pathlib.Path(tmp).iterdir()), [])
+
+    def test_dry_run_writes_nothing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(m, "DATA_DIR", pathlib.Path(tmp)):
+                m.write_index(self._snap([item(week=1)]), "2026-2", dry_run=True)
+            self.assertEqual(list(pathlib.Path(tmp).iterdir()), [])
+
+
 if __name__ == "__main__":
     unittest.main()

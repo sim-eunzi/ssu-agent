@@ -7,7 +7,7 @@
     ssu-agent brief --json        헤르메스봇이 받아갈 구조 (--ack 로 outbox 비움)
     ssu-agent items [과목]        남은 항목 나열
     ssu-agent vault-sync          Canvas 상태를 vault 에 반영 (study.py 경유)
-    ssu-agent materials           개봉된 강의의 PDF 자료 내려받기 (data/)
+    ssu-agent materials           PDF 자료 내려받기 + 주차 인덱스 갱신 (data/)
 
 **아무것도 전송하지 않는다.** 텔레그램은 헤르메스봇 하나가 담당한다.
 이 CLI 는 계산해서 stdout 으로 내놓기만 한다.
@@ -168,6 +168,9 @@ def cmd_materials(a):
                         dry_run=a.dry_run)
     print("{} 저장 {saved} · 건너뜀 {skipped} · 실패 {failed} · {mb:.1f}MB".format(
         "[dry-run]" if a.dry_run else "", mb=res["bytes"] / 1048576.0, **res))
+    n = materials.write_index(snap, snap.get("semester") or get().semester,
+                              dry_run=a.dry_run)
+    print("주차 인덱스 {}개 갱신 (대시보드가 읽는 meta.json)".format(n))
     pend = materials.not_ready(snap)
     if pend:
         print("아직 공개 전 {}건 — 주차가 풀리면 받는다 (실패 아님)".format(len(pend)))

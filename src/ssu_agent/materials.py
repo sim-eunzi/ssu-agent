@@ -99,6 +99,51 @@ def not_ready(snap):
     return out
 
 
+def week_index(entry):
+    """과목 entry → {주차: [링크]}. 대시보드가 읽을 형태로 납작하게."""
+    out = {}
+    for it in entry.get("items") or []:
+        wk = it.get("week")
+        if wk is None:
+            continue
+        try:
+            wk = int(wk)
+        except (TypeError, ValueError):
+            continue
+        rec = {"kind": it.get("kind"), "title": it.get("title") or "",
+               "url": it.get("html_url") or ""}
+        for k in ("content_type", "completed", "unopened", "due_at"):
+            if it.get(k) is not None:
+                rec[k] = it[k]
+        out.setdefault(wk, []).append(rec)
+    return out
+
+
+def write_index(snap, semester, dry_run=False):
+    """주차별 링크를 meta.json 에 심는다. **대시보드와의 계약이 여기다.**
+
+    대시보드가 `state/snapshot.json` 을 직접 읽으면 ssu-agent 내부 구조에
+    결합된다. meta.json 을 인터페이스로 두면 소스도 하나로 준다 —
+    대시보드는 이미 `data/` 에서 자료를 읽어야 한다.
+
+    🔴 자료 장부(`items`)는 보존한다. 덮으면 멱등이 깨져 이미 받은 걸 또 받는다.
+    """
+    n = 0
+    for _cid, e in sorted((snap.get("courses") or {}).items()):
+        stem = e.get("stem")
+        for wk, links in sorted(week_index(e).items()):
+            if dry_run:
+                n += 1
+                continue
+            d = week_dir(semester, stem, wk)
+            meta = load_meta(d)
+            meta.update(course=stem, week=wk, links=links,
+                        updated_at=datetime.now(KST).isoformat(timespec="seconds"))
+            save_meta(d, meta)
+            n += 1
+    return n
+
+
 def week_dir(semester, stem, week):
     return DATA_DIR / semester / stem / ("W%02d" % int(week))
 
