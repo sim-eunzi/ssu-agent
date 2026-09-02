@@ -102,27 +102,36 @@ class LearningX:
         self._lock = threading.Lock()   # 스레드풀에서 401 재발급이 겹치지 않게
 
     # --- 런치 씨앗 ------------------------------------------------------
-    def find_seed(self):
-        """런치에 쓸 (course_id, item_id) 하나를 찾는다.
+    def find_seed(self, refresh=False):
+        """런치에 쓸 출석 아이템 하나를 찾는다.
 
         모듈 아이템의 external_url 이 lecture_attendance/items/view/{id} 인
         것만 고른다. 같은 ExternalTool 이어도 tool 41 은 Q&A 게시판이라
         JWT 가 나오지 않는다.
+
+        launch_api_url 은 아이템의 url 필드를 **그대로** 쓴다. tool id 와
+        인코딩된 inner url 이 이미 박혀 있어서, 우리가 다시 조립하면
+        이중 인코딩(%253A)으로 500 이 난다. 과목마다 tool id 가 다를 수
+        있다는 문제도 같이 사라진다.
         """
         cached = state.load("seed.json")
-        if cached.get("course_id") and cached.get("item_id"):
-            return cached["course_id"], cached["item_id"]
+        if not refresh and cached.get("launch_api_url"):
+            return cached
 
         for cid in self.cfg.course_ids:
             try:
                 for m in self.canvas.modules(cid):
                     for it in m.get("items") or []:
                         hit = ATTENDANCE_RE.search(it.get("external_url") or "")
-                        if hit:
-                            seed = {"course_id": cid, "item_id": int(hit.group(1)),
-                                    "found_at": state.now().isoformat(timespec="seconds")}
+                        if hit and it.get("url"):
+                            seed = {
+                                "course_id": cid,
+                                "item_id": int(hit.group(1)),
+                                "launch_api_url": it["url"],
+                                "found_at": state.now().isoformat(timespec="seconds"),
+                            }
                             state.save("seed.json", seed)
-                            return seed["course_id"], seed["item_id"]
+                            return seed
             except net.HttpError:
                 continue
         raise RuntimeError("출석 아이템을 가진 과목을 찾지 못했다 "
@@ -151,13 +160,13 @@ class LearningX:
         oauth_nonce/oauth_timestamp 는 일회용이다. 1~3 을 끊지 않고 잇는다.
         """
         base = self.cfg.canvas_base
-        cid, item = self.find_seed()
-        inner = urllib.parse.quote(
-            "{}/learningx/lti/lecture_attendance/items/view/{}".format(base, item),
-            safe="")
-        launch = self.canvas.get(
-            "/api/v1/courses/{}/external_tools/sessionless_launch".format(cid),
-            **{"url": inner})["url"]
+        seed = self.find_seed()
+        try:
+            launch = net.get_json(seed["launch_api_url"], headers=self.canvas._h)["url"]
+        except net.HttpError:
+            # 아이템이 사라졌거나 재편성됐다. 씨앗을 다시 찾는다.
+            seed = self.find_seed(refresh=True)
+            launch = net.get_json(seed["launch_api_url"], headers=self.canvas._h)["url"]
 
         opener, jar = net.cookie_opener()
         page = net.get_text(launch, opener=opener)

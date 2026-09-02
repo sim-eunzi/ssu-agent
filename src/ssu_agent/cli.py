@@ -54,7 +54,8 @@ def cmd_auth(a):
     tok = lx.jwt(force=a.force)
     left = canvas_mod.jwt_exp(tok) - time.time()
     seed = state.load("seed.json")
-    print("런치 씨앗   course {} · item {}".format(seed.get("course_id"), seed.get("item_id")))
+    print("런치 씨앗   course {} · item {}".format(
+        seed.get("course_id"), seed.get("item_id")))
     print("JWT         ✅ {}… ({:.1f}s)".format(tok[:24], time.time() - t0))
     print("만료까지    {}분".format(int(left // 60)))
     return 0
@@ -116,13 +117,15 @@ def cmd_items(a):
     for c in assessment["courses"]:
         if target and target not in (c["stem"], str(c["canvas_id"])):
             continue
-        print("\n{} {} — {}개 · {} · {} (필요/가용 {})".format(
+        print("\n{} {} — {}개 · {}{} · {} (필요/가용 {})".format(
             c["icon"], c["stem"], c["pending_count"],
+            "≈" if c.get("estimated") else "",
             risk.fmt_hours(c["remaining_hours"]), c["level"], c["ratio"]))
         for p in c["pending"]:
             dt = risk.parse_dt(p["deadline"])
-            print("   {}주 {:<44} {:>7} {}".format(
-                p["week"] or "?", (p["title"] or "")[:44],
+            print("   {:>2}주 {:<42} {}{:>7}  {}".format(
+                p["week"] or "?", (p["title"] or "")[:42],
+                "≈" if p.get("unopened") else " ",
                 risk.fmt_hours(p["remaining_sec"] / 3600.0),
                 dt.strftime("%m/%d %H:%M") if dt else "마감미정"))
     if assessment["overdue"]:

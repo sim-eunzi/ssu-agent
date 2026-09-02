@@ -35,6 +35,9 @@ Canvas 개인 액세스 토큰은 만료 없음. LearningX JWT는 2시간.
 1) GET /api/v1/courses/{cid}/external_tools/sessionless_launch?id={tool}&url={encoded_lti_url}
      Header: Authorization: Bearer {CANVAS_TOKEN}
      → {"id":73, "name":"강의/출결", "url": "<서명된 launch URL>"}
+     ※ 이 URL 은 직접 조립하지 말고 모듈 아이템의 `url` 필드를 그대로 쓴다.
+       tool id 와 인코딩된 inner url 이 이미 박혀 있다. 다시 quote 하면
+       이중 인코딩(%253A)으로 500 이 난다 (2026-09-02 실측).
 
 2) GET <launch URL>
      → HTML. <form action="..."> 안에 hidden input 47개 (oauth_* 서명 포함)
@@ -49,11 +52,13 @@ Canvas 개인 액세스 토큰은 만료 없음. LearningX JWT는 2시간.
 4) LearningX API 호출: Authorization: Bearer {JWT}
 ```
 
-**함정 두 가지**
+**함정 세 가지**
 
 - 폼 파싱은 반드시 `<input>` 태그 단위로. `name="..." value="..."` 정규식은
   중간에 `id="..."`가 끼어 실패한다 (실제로 500 발생함).
 - `oauth_nonce`/`oauth_timestamp`는 일회용. 1~3을 한 흐름에서 즉시 처리할 것.
+  (재시도 로직이 있다면 이 POST 만은 `retries=0` 이어야 한다)
+- 1단계 URL 을 직접 만들지 말 것. 위 ※ 참조.
 
 **JWT 하나로 전 과목 접근 가능.** 2시간에 런치 1회면 7과목 전부 커버.
 `tool id=73`은 모듈 아이템의 `content_id`에서 얻는다 (과목마다 다를 수 있음).
@@ -73,6 +78,23 @@ Canvas 개인 액세스 토큰은 만료 없음. LearningX JWT는 2시간.
 `lessons[].lessons[]`는 수업 일정 메타(class_date, classroom)일 뿐 항목 배열 아님.
 
 **`attendance_items/{id}`** — 아이템 단위. 목록 엔드포인트는 500이라 N+1 불가피.
+
+> **2026-09-02 실측 정정 ★** 이건 과목 콘텐츠 목록이 아니라 **내가 한 번이라도
+> 연 항목의 개인 기록**이다. 안 연 항목은 **404** (`opened: true` 필드가 근거).
+> 7과목 237개 중 156개가 404였고, 분포가 정확히 열람 이력과 일치했다 —
+> 창의융합·선형대수는 0건, 확장현실은 15/15 전부 404.
+>
+> - 404 는 에러가 아니라 **"안 봤다 = 100% 남았다"는 정보**로 쓴다.
+> - 다만 `duration`도 같이 못 얻는다. `lessons`에도 없고, 다른 경로
+>   (`/attendance_items/{id}` 무과목, `sections/0/components/{id}/progress`,
+>   `components`, `attendances`, `activities`)는 전부 404/400/403/500.
+> - 길이를 알려면 LTI 를 런치해야 하는데 그건 열람 기록을 남긴다.
+>   `attendance_calc_type`이 열람 기준인 항목이 있을 수 있어 **하지 않는다** (§5).
+> - 대신 그 과목의 실측 중앙값으로 추정하고 메시지에 `≈` 로 밝힌다.
+>   표본 3개 미만이면 전체 과목 중앙값으로 넘어간다.
+>
+> `content_type` 은 `movie` / `everlec` / `pdf` / `file` 네 가지가 실측됐다.
+> `everlec` 도 `duration` 이 있으므로 영상으로 센다.
 
 ```json
 {
@@ -206,7 +228,7 @@ ssu-agent/                       신규 repo (iMac)
 
 ## 6. 마일스톤
 
-### M1 — 마감·진도 알림 (최소 동작)
+### M1 — 마감·진도 알림 (최소 동작) ✅ 2026-09-02 구현
 
 1. `canvas.py` — 인증 체인(§2.1), JWT 캐시(2h)
 2. `sync.py` — `lessons` + `attendance_items` 수집
@@ -275,6 +297,9 @@ STUDY_PY=/Users/eunzi/eunzi-tools/bin/study.py
 ## 10. 열린 항목
 
 1. Commons CDN 직링크가 인증 없이 받아지는지 (`curl -I`)
-2. `attendance_items` 조회 시 아이템 22/52가 비었던 이유 (퀴즈·과제는 콘텐츠 없음일 가능성)
+2. ~~`attendance_items` 조회 시 아이템 22/52가 비었던 이유~~
+   **해결 (2026-09-02)** — 열람하지 않은 항목이라 404. §2.2 참조.
+   남은 문제는 미개봉 항목의 `duration` 을 얻을 방법이 없다는 것.
+   교수가 주차별로 콘텐츠를 열어주면 자연히 줄어들 값이라 M1 에선 추정으로 둔다.
 3. `study.py` 보강 3건의 `/feature` 판정
 4. `note.md` 편집용 대시보드 UI — 별도 작업 (Next.js, `data/` 경로 읽기)

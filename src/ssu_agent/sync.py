@@ -101,6 +101,8 @@ def flatten_attendance(raw):
     ad = raw.get("attendance_data") or {}
     cd = raw.get("item_content_data") or {}
     return {
+        "opened": bool(raw.get("opened")),
+        "unopened": False,
         "lx_title": raw.get("title"),
         "lx_week": raw.get("week_position"),
         "lx_lesson": raw.get("lesson_position"),
@@ -208,8 +210,16 @@ def run(full=False, only=None, verbose=False):
                 merged.update(data)
                 return merged
             except net.HttpError as e:
-                rec["error"] = "attendance_item {}: {}".format(iid, e.code)
-                return rec
+                merged = dict(rec)
+                if e.code == 404:
+                    # attendance_items 는 '내가 연 항목'만 있는 개인 기록이다.
+                    # 404 = 한 번도 안 열었다 = 100% 남았다. 에러가 아니라 정보다.
+                    # 길이를 알려면 LTI 를 런치해야 하는데, 그건 열람 기록을
+                    # 남기므로 하지 않는다 (Non-goals).
+                    merged.update(unopened=True, opened=False, completed=False)
+                else:
+                    merged["error"] = "attendance_item {}: {}".format(iid, e.code)
+                return merged
 
         if lectures:
             lx.jwt()          # 스레드 진입 전에 미리 확보
@@ -225,11 +235,15 @@ def run(full=False, only=None, verbose=False):
         entry["items"].sort(key=lambda x: (x.get("week") or 99,
                                            x.get("position") or 0))
         if verbose:
-            n_lec = sum(1 for i in entry["items"] if i.get("kind") == "lecture")
-            done = sum(1 for i in entry["items"] if i.get("completed"))
-            print("  {:<22} 주차{:>3} · 강의{:>3}({}완료) · 평가{:>2} {}".format(
-                c["stem"], len(entry["weeks"]), n_lec, done,
-                len(graded), "⚠ " + "; ".join(entry["errors"]) if entry["errors"] else ""))
+            lec_items = [i for i in entry["items"] if i.get("kind") == "lecture"]
+            done = sum(1 for i in lec_items if i.get("completed"))
+            unopened = sum(1 for i in lec_items if i.get("unopened"))
+            errs = [i for i in lec_items if i.get("error")]
+            print("  {:<22} 주차{:>3} · 강의{:>3} (완료 {} · 미개봉 {}) · 평가{:>2}{}".format(
+                c["stem"], len(entry["weeks"]), len(lec_items), done, unopened,
+                len(graded),
+                "  ⚠ " + "; ".join(entry["errors"] + ["조회실패 %d건" % len(errs)][:1 if errs else 0])
+                if (entry["errors"] or errs) else ""))
 
     if prev:
         state.save(PREV, prev)

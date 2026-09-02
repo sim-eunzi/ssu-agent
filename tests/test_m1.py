@@ -149,6 +149,51 @@ class TestRemaining(unittest.TestCase):
         self.assertAlmostEqual(a, b)
 
 
+class TestUnopened(unittest.TestCase):
+    """attendance_items 는 '내가 연 항목'만 있는 개인 기록 — 404 는 정보다."""
+
+    def test_unopened_counts_as_full(self):
+        self.assertEqual(risk.remaining_seconds(
+            {"unopened": True, "title": "3주차 1차시"}, 1400), 1400)
+
+    def test_unopened_material_is_not_video_time(self):
+        for t in ("[학습자료]_4차산업혁명과 창업_0101", "3주차 강의자료", "교안 PDF"):
+            self.assertEqual(risk.remaining_seconds({"unopened": True, "title": t}, 1400), 0, t)
+
+    def test_unopened_falls_back_to_default(self):
+        self.assertEqual(risk.remaining_seconds({"unopened": True, "title": "x"}),
+                         risk.DEFAULT_DURATION)
+
+    def test_everlec_is_video(self):
+        self.assertEqual(risk.remaining_seconds(
+            {"content_type": "everlec", "duration": 603}), 603)
+
+    def test_pdf_is_not_video(self):
+        self.assertEqual(risk.remaining_seconds(
+            {"content_type": "pdf", "duration": 900}), 0)
+
+    def test_estimate_needs_a_sample(self):
+        one = [{"content_type": "movie", "duration": 1596}]
+        self.assertIsNone(risk.estimate_duration(one))
+        self.assertEqual(risk.estimate_duration(one, min_sample=1), 1596)
+        three = [{"content_type": "movie", "duration": d} for d in (900, 1200, 1800)]
+        self.assertEqual(risk.estimate_duration(three), 1200)
+
+    def test_assess_marks_estimated(self):
+        now = datetime(2026, 9, 2, 12, 0, tzinfo=KST)
+        snap = {"courses": {"48466": {
+            "canvas_id": 48466, "stem": "확장현실디자인",
+            "weeks": {"1": {"due_at": "2026-09-14T14:59:59Z"}},
+            "items": [{"kind": "lecture", "item_id": 640796, "week": 1,
+                       "title": "확장현실디자인 1주차", "unopened": True}]}}}
+        a = risk.assess(snap, now=now)
+        c = a["courses"][0]
+        self.assertTrue(c["estimated"])
+        self.assertEqual(c["unopened_count"], 1)
+        self.assertEqual(a["total"]["unopened_count"], 1)
+        self.assertGreater(c["remaining_hours"], 0)
+
+
 class TestAvailability(unittest.TestCase):
     def setUp(self):
         self.cfg = get()
@@ -298,6 +343,11 @@ class TestMessages(unittest.TestCase):
                        "due_at": "2026-09-08T14:59:59Z",
                        "html_url": "https://canvas.ssu.ac.kr/x?a=1&b=2"}]}}}
         return risk.assess(snap, now=now)
+
+    def test_estimate_note_appears(self):
+        a = self.build()
+        a["total"]["unopened_count"] = 156
+        self.assertIn("156개", notify.morning(a))
 
     def test_all_three_render(self):
         a = self.build()

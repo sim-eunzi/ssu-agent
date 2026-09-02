@@ -59,9 +59,39 @@ def _dl(iso, now):
 
 
 def course_line(c, now):
-    left = "{}개 · {}".format(c["pending_count"], fmt_hours(c["remaining_hours"]))
+    left = "{}개 · {}{}".format(c["pending_count"],
+                               "≈" if c.get("estimated") else "",
+                               fmt_hours(c["remaining_hours"]))
     return "{} <b>{}</b> — {} · {}".format(
         c["icon"], esc(c["stem"]), left, _dl(c["nearest_deadline"], now))
+
+
+def verdict(total, now):
+    """'언제까지 얼마가 필요한데 얼마밖에 없다'를 한 줄로."""
+    cr = total["crunch"]
+    if not cr["deadline"]:
+        return "마감 걸린 잔여 없음."
+    dt = parse_dt(cr["deadline"])
+    return "{} <b>{}까지</b> {} 필요 / {} 확보 가능".format(
+        total["icon"], dt.strftime("%m/%d %H:%M"),
+        fmt_hours(cr["need_hours"]), fmt_hours(cr["available_hours"]))
+
+
+def estimate_note(total):
+    """추정이 섞였으면 숨기지 않고 밝힌다."""
+    n = total.get("unopened_count") or 0
+    if not n:
+        return None
+    return "<i>≈ 는 추정. 한 번도 안 연 강의 {}개는 길이를 알 수 없어 " \
+           "과목 중앙값으로 셌다.</i>".format(n)
+
+
+def collision_note(assessment):
+    """과목별로는 되는데 합치면 안 되는 상황을 짚어준다."""
+    t = assessment["total"]
+    if t["ratio"] >= 0.8 and all(c["ratio"] < 0.8 for c in assessment["courses"]):
+        return "과목별로는 되는데 <b>합치면 안 된다</b>. 겹친 마감이 문제다."
+    return None
 
 
 def morning(assessment, snapshot=None):
@@ -75,10 +105,11 @@ def morning(assessment, snapshot=None):
     else:
         for c in hot[:8]:
             lines.append(course_line(c, now))
-        lines += ["",
-                  "합계 {} · 마감까지 확보 가능 {} {}".format(
-                      fmt_hours(t["remaining_hours"]),
-                      fmt_hours(t["available_hours"]), t["icon"])]
+        lines += ["", "합계 {} 남음".format(fmt_hours(t["remaining_hours"])),
+                  verdict(t, now)]
+        for note in (collision_note(assessment), estimate_note(t)):
+            if note:
+                lines.append(note)
     if assessment["overdue"]:
         lines += ["", "⚠️ 마감 지남 {}건".format(len(assessment["overdue"]))]
         for r in assessment["overdue"][:3]:
@@ -133,11 +164,12 @@ def weekly(assessment):
         lines.append(course_line(c, now))
     if len(lines) == 2:
         lines.append("남은 강의 없음.")
-    lines += ["",
-              "총 {} · 이번 주 확보 가능 {}".format(
-                  fmt_hours(t["remaining_hours"]),
-                  fmt_hours(t["available_hours"])),
+    lines += ["", "총 {} 남음".format(fmt_hours(t["remaining_hours"])),
+              verdict(t, now),
               "{} {} (필요/가용 = {})".format(t["icon"], t["level"], t["ratio"])]
+    for note in (collision_note(assessment), estimate_note(t)):
+        if note:
+            lines.append(note)
     return "\n".join(lines)
 
 
