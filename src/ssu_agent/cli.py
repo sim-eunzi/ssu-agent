@@ -15,13 +15,15 @@
 """
 
 import argparse
+import contextlib
+import io
 import json
 import sys
 import time
 
 from . import brief as brief_mod
 from . import canvas as canvas_mod
-from . import events, materials, risk, state, study_cli, summarize, sync
+from . import events, materials, refresh, risk, state, study_cli, summarize, sync
 from .config import ROOT, get
 
 
@@ -157,7 +159,7 @@ def cmd_vault_sync(a):
 
     if not a.dry_run:
         state.save(study_cli.SKIPPED, store)
-    print("{} 적용 {applied} · 스킵 {skipped} · 오류 {errors}{}".format(
+    _sum("{} 적용 {applied} · 스킵 {skipped} · 오류 {errors}{}".format(
         "[dry-run]" if a.dry_run else "", "  ⏸ 락" if locked else "", **tot))
     return 0
 
@@ -167,7 +169,7 @@ def cmd_materials(a):
     snap = _snapshot(refresh=a.refresh)
     res = materials.run(snap, snap.get("semester") or get().semester,
                         dry_run=a.dry_run)
-    print("{} 저장 {saved} · 건너뜀 {skipped} · 실패 {failed} · {mb:.1f}MB".format(
+    _sum("{} 저장 {saved} · 건너뜀 {skipped} · 실패 {failed} · {mb:.1f}MB".format(
         "[dry-run]" if a.dry_run else "", mb=res["bytes"] / 1048576.0, **res))
     n = materials.write_index(snap, snap.get("semester") or get().semester,
                               dry_run=a.dry_run)
@@ -204,6 +206,8 @@ def cmd_summarize(a):
         return 0
     if a.estimate:
         e = summarize.estimate(sem)
+        _sum("[예상] 문서 {docs}개 · {chars:,}자 · 호출 {chunks}회 · ${est_usd}"
+             .format(**e))
         print("문서 {docs}개 · {chars:,}자 · 호출 {chunks}회 예상".format(**e))
         print("  스캔 PDF {unsupported}개 제외 · 이미 된 것 {skipped}개".format(**e))
         print("  입력 ~{est_input_tokens:,}토큰 · 출력 ~{est_output_tokens:,}토큰"
@@ -215,13 +219,90 @@ def cmd_summarize(a):
     except Exception as e:
         raise SystemExit("요약 실패 — %s: %s"
                          % (type(e).__name__, str(e).split("\n")[0][:160]))
-    print("요약 {done} · 건너뜀 {skipped} · 스캔 {unsupported} · 실패 {failed} "
-          "· 호출 {calls}회{}".format("  ⏸ 상한" if res["budget_hit"] else "", **res))
+    _sum("요약 {done} · 건너뜀 {skipped} · 스캔 {unsupported} · 실패 {failed} "
+         "· 호출 {calls}회{}".format("  ⏸ 상한" if res["budget_hit"] else "", **res))
     if res.get("in_tokens") or res.get("out_tokens"):
         print("  실제 토큰 — 입력 {in_tokens:,} · 출력 {out_tokens:,}".format(**res))
     if res["budget_hit"]:
         print("  남은 것은 .progress/ 에 있다 — 다음 실행이 이어받는다")
     return 0
+
+
+SUMMARY = []
+
+
+def _sum(s):
+    """찍으면서 동시에 '이게 이 명령의 요약 줄' 이라고 표시한다.
+
+    refresh 가 마지막 줄을 긁어가던 방식은 틀렸다 — cmd_materials 는 요약
+    뒤에 미공개 목록을 더 찍어서 ZIP 파일명이 요약 자리에 올라왔다.
+    긁지 말고 **찍는 쪽이 알려준다.**
+    """
+    SUMMARY.append(s)
+    print(s)
+
+
+class _Args(object):
+    def __init__(self, **kw):
+        self.__dict__.update(kw)
+
+
+def _quiet(fn, args):
+    """기존 cmd_* 를 그대로 부르고 **마지막 요약 줄**만 가져온다.
+
+    형식을 여기서 다시 짜면 출력이 두 벌 생겨 따로 늙는다. cmd_* 들은 이미
+    끝줄에 한 줄 요약을 찍으므로 그걸 쓴다. 상세는 --verbose 로 흘린다.
+    """
+    del SUMMARY[:]
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        fn(args)
+    detail = buf.getvalue()
+    if SUMMARY:
+        line = " · ".join(x.strip() for x in SUMMARY)
+    else:
+        lines = [x for x in detail.splitlines() if x.strip()]
+        line = lines[-1].strip() if lines else "(출력 없음)"
+    return {"ok": True, "line": line, "detail": detail}
+
+
+def cmd_refresh(a):
+    """수집 → vault → 자료 → 요약. 코코봇이 부르는 입구다 (refresh.py 참고)."""
+    want = list(refresh.STEPS)
+    if a.no_summary:
+        want.remove("summary")
+    if a.no_materials:
+        want = [w for w in want if w not in ("materials", "summary")]
+
+    fresh = _Args(refresh=False, dry_run=a.dry_run, verbose=False)
+
+    def _sync():
+        snap = sync.run(verbose=False)
+        nc = len(snap.get("courses") or {})
+        ni = sum(len(e.get("items") or [])
+                 for e in (snap.get("courses") or {}).values())
+        errs = [x for e in (snap.get("courses") or {}).values()
+                for x in (e.get("errors") or [])]
+        # 과목이 하나도 안 잡혔으면 수집 실패다 — 뒤를 돌리면 안 된다.
+        return {"ok": nc > 0,
+                "line": "{}과목 {}항목{}".format(
+                    nc, ni, "  ⚠️ 오류 %d건" % len(errs) if errs else "")}
+
+    fns = {
+        "sync": _sync,
+        "vault": lambda: _quiet(cmd_vault_sync, fresh),
+        "materials": lambda: _quiet(cmd_materials, fresh),
+        # 🔴 dry-run 은 estimate 로 간다. 안 그러면 "확인만 할게" 가 돈을 쓴다.
+        "summary": lambda: _quiet(cmd_summarize, _Args(
+            models=False, estimate=a.dry_run, limit=a.limit)),
+    }
+    res = refresh.run(fns, want=tuple(want))
+    if a.verbose:
+        for s in res["steps"]:
+            print("--- {} ---".format(s["name"]))
+            print(s.get("detail") or s["line"])
+    sys.stdout.write(refresh.render(res))
+    return 1 if res["aborted"] else 0
 
 
 # ---------------------------------------------------------------- main
@@ -270,6 +351,16 @@ def build_parser():
     su.add_argument("--limit", type=int, default=summarize.MAX_CALLS,
                     help="이번 실행의 LLM 호출 상한 (기본 %d)" % summarize.MAX_CALLS)
     su.set_defaults(func=cmd_summarize)
+
+    rf = sub.add_parser("refresh", help="수집→vault→자료→요약 한 번에 (코코봇 입구)")
+    rf.add_argument("--no-summary", action="store_true",
+                    help="LLM 요약 건너뛰기 (비용 0)")
+    rf.add_argument("--no-materials", action="store_true",
+                    help="자료 다운로드·요약 건너뛰기")
+    rf.add_argument("--limit", type=int, default=None, help="요약 LLM 호출 상한")
+    rf.add_argument("--dry-run", action="store_true")
+    rf.add_argument("--verbose", action="store_true", help="각 단계 원문 출력")
+    rf.set_defaults(func=cmd_refresh)
 
     it = sub.add_parser("items")
     it.add_argument("course", nargs="?", help="vault stem 또는 Canvas ID")

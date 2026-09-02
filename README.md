@@ -45,6 +45,7 @@ study.py add ... --lock-timeout 30    # 멱등 · 주차 정렬 삽입 · 락 �
 | `study_cli.py` | Canvas 상태 → vault. `study.py` 를 서브프로세스로 (직접 쓰기 없음) |
 | `materials.py` | Commons PDF 다운로드 + 주차 인덱스(`meta.json`) |
 | `summarize.py` | 자료 → 마크다운 → LLM 요약. **재개 장부**로 중단·에러를 이어받는다 |
+| `refresh.py` | 위 넷을 한 번에. **코코봇의 입구** — 순서·중단·보고를 여기가 진다 |
 
 ## 쓰기
 
@@ -55,7 +56,27 @@ cp .env.example .env      # CANVAS_TOKEN 채우기
 ./bin/ssu-agent sync      # 수집 → state/snapshot.json
 ./bin/ssu-agent items 선형대수
 ./bin/ssu-agent brief morning
+./bin/ssu-agent refresh    # 수집→vault→자료→요약 한 번에 (실측 21.7초)
 ```
+
+### 코코봇이 "최신 LMS 업데이트해줘" 로 부르는 법
+
+```bash
+./bin/ssu-agent refresh                  # 전부
+./bin/ssu-agent refresh --no-summary     # LLM 안 부름 (비용 0)
+./bin/ssu-agent refresh --dry-run        # 확인만. 요약은 estimate 로 빠진다
+```
+
+**순서를 스킬에 적지 않는다.** 적으면 스킬과 cron 이 따로 늙는다 — `univ-save`
+가 `study.py` 에 로직을 전부 맡긴 것과 같은 규약이다.
+
+🔴 **`sync` 가 문지기다.** 실패하면 뒤를 전부 접고 exit 1 이다 — 낡은 스냅샷으로
+vault 를 고치면 마감이 되돌아간다. 나머지 단계는 서로 독립이라 자료 하나가
+실패해도 요약은 돈다. 401·연결 실패는 **은지가 읽을 문장으로 번역해서** 낸다.
+
+헤르메스 terminal 의 foreground 상한은 600초다 (`FOREGROUND_MAX_TIMEOUT`).
+실측 21.7초라 여유가 있지만, 새 주차가 열려 자료 100MB + 요약이 붙는 날은
+`timeout=600` 을 명시해서 부르는 게 안전하다.
 
 의존성 없음. venv 없이 시스템 `python3` 로 돈다 (3.8+).
 
