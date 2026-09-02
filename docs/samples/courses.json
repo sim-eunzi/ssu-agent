@@ -1,418 +1,418 @@
 [
-  {
-    "id": 48130,
-    "name": "[인간과성서]현대사회이슈와기독교 (2150102023)",
-    "account_id": 27,
-    "uuid": "zepp9BV2zm4nTbdsCE3ZVYNPPXgSpXI10YzS7Oed",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:12:06Z",
-    "course_code": "[인간과성서]현대사회이슈와기독교 (2150102023)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_zepp9BV2zm4nTbdsCE3ZVYNPPXgSpXI10YzS7Oed.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "on_campus",
-    "restrict_enrollments_to_course_dates": false,
-    "overridden_course_visibility": ""
+ {
+  "id": 48130,
+  "name": "[인간과성서]현대사회이슈와기독교 (2150102023)",
+  "account_id": 27,
+  "uuid": "zepp9BV2zm4nTbdsCE3ZVYNPPXgSpXI10YzS7Oed",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:12:06Z",
+  "course_code": "[인간과성서]현대사회이슈와기독교 (2150102023)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_zepp9BV2zm4nTbdsCE3ZVYNPPXgSpXI10YzS7Oed.ics"
   },
-  {
-    "id": 47738,
-    "name": "4차산업혁명과창업 (사전녹화) (2150046001)",
-    "account_id": 27,
-    "uuid": "tRcQ9u79WFANYwdMwa8EkUzVivjmXX78StFufbDO",
-    "start_at": "2026-08-31T15:00:00Z",
-    "grading_standard_id": null,
-    "is_public": false,
-    "created_at": "2026-08-14T10:11:32Z",
-    "course_code": "4차산업혁명과창업 (사전녹화) (2150046001)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": "private",
-    "grade_passback_setting": null,
-    "end_at": "2026-12-18T15:00:00Z",
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "locale": "ko",
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_tRcQ9u79WFANYwdMwa8EkUzVivjmXX78StFufbDO.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "online",
-    "restrict_enrollments_to_course_dates": false,
-    "overridden_course_visibility": ""
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "on_campus",
+  "restrict_enrollments_to_course_dates": false,
+  "overridden_course_visibility": ""
+ },
+ {
+  "id": 47738,
+  "name": "4차산업혁명과창업 (사전녹화) (2150046001)",
+  "account_id": 27,
+  "uuid": "tRcQ9u79WFANYwdMwa8EkUzVivjmXX78StFufbDO",
+  "start_at": "2026-08-31T15:00:00Z",
+  "grading_standard_id": null,
+  "is_public": false,
+  "created_at": "2026-08-14T10:11:32Z",
+  "course_code": "4차산업혁명과창업 (사전녹화) (2150046001)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": "private",
+  "grade_passback_setting": null,
+  "end_at": "2026-12-18T15:00:00Z",
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "locale": "ko",
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_tRcQ9u79WFANYwdMwa8EkUzVivjmXX78StFufbDO.ics"
   },
-  {
-    "id": 18304,
-    "name": "2022년 원격수업 운영 현황 및 요구조사(재학생 대상)",
-    "account_id": 1,
-    "uuid": "12LjKbKLyUXlnyPF5KBOIAfLK6YB0uozY2zLiNOr",
-    "start_at": "2022-08-31T15:00:00Z",
-    "grading_standard_id": null,
-    "is_public": false,
-    "created_at": "2022-09-06T01:18:50Z",
-    "course_code": "2022년 원격수업 운영 현황 및 요구조사(재학생 대상)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 16,
-    "license": "private",
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": false,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_12LjKbKLyUXlnyPF5KBOIAfLK6YB0uozY2zLiNOr.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "restrict_enrollments_to_course_dates": true,
-    "overridden_course_visibility": ""
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "online",
+  "restrict_enrollments_to_course_dates": false,
+  "overridden_course_visibility": ""
+ },
+ {
+  "id": 18304,
+  "name": "2022년 원격수업 운영 현황 및 요구조사(재학생 대상)",
+  "account_id": 1,
+  "uuid": "12LjKbKLyUXlnyPF5KBOIAfLK6YB0uozY2zLiNOr",
+  "start_at": "2022-08-31T15:00:00Z",
+  "grading_standard_id": null,
+  "is_public": false,
+  "created_at": "2022-09-06T01:18:50Z",
+  "course_code": "2022년 원격수업 운영 현황 및 요구조사(재학생 대상)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 16,
+  "license": "private",
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": false,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_12LjKbKLyUXlnyPF5KBOIAfLK6YB0uozY2zLiNOr.ics"
   },
-  {
-    "id": 48096,
-    "name": "비전채플 (2150101510)",
-    "account_id": 103,
-    "uuid": "UPkrAR5Dh5Z9FqjPPJ3j34Z3ZuypikaMXcXwLbPJ",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:12:03Z",
-    "course_code": "비전채플 (2150101510)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_UPkrAR5Dh5Z9FqjPPJ3j34Z3ZuypikaMXcXwLbPJ.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "on_campus",
-    "restrict_enrollments_to_course_dates": false,
-    "overridden_course_visibility": ""
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "restrict_enrollments_to_course_dates": true,
+  "overridden_course_visibility": ""
+ },
+ {
+  "id": 48096,
+  "name": "비전채플 (2150101510)",
+  "account_id": 103,
+  "uuid": "UPkrAR5Dh5Z9FqjPPJ3j34Z3ZuypikaMXcXwLbPJ",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:12:03Z",
+  "course_code": "비전채플 (2150101510)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_UPkrAR5Dh5Z9FqjPPJ3j34Z3ZuypikaMXcXwLbPJ.ics"
   },
-  {
-    "id": 48462,
-    "name": "선형대수 (대면+사전녹화) (2150151201)",
-    "account_id": 155,
-    "uuid": "gyjfHYiuYRXzvgXxN03X3uLbpZ7klLG688khagBi",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:12:35Z",
-    "course_code": "선형대수 (대면+사전녹화) (2150151201)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_gyjfHYiuYRXzvgXxN03X3uLbpZ7klLG688khagBi.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "blended",
-    "restrict_enrollments_to_course_dates": false
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "on_campus",
+  "restrict_enrollments_to_course_dates": false,
+  "overridden_course_visibility": ""
+ },
+ {
+  "id": 48462,
+  "name": "선형대수 (대면+사전녹화) (2150151201)",
+  "account_id": 155,
+  "uuid": "gyjfHYiuYRXzvgXxN03X3uLbpZ7klLG688khagBi",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:12:35Z",
+  "course_code": "선형대수 (대면+사전녹화) (2150151201)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_gyjfHYiuYRXzvgXxN03X3uLbpZ7klLG688khagBi.ics"
   },
-  {
-    "id": 47737,
-    "name": "시민교양을위한정치철학:한나아렌트 (사전녹화) (2150045901)",
-    "account_id": 27,
-    "uuid": "pDv70zHF3XN5V2clenjX6Xn3jHnb87g7fLkroiHV",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:11:32Z",
-    "course_code": "시민교양을위한정치철학:한나아렌트 (사전녹화) (2150045901)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_pDv70zHF3XN5V2clenjX6Xn3jHnb87g7fLkroiHV.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "online",
-    "restrict_enrollments_to_course_dates": false,
-    "overridden_course_visibility": ""
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "blended",
+  "restrict_enrollments_to_course_dates": false
+ },
+ {
+  "id": 47737,
+  "name": "시민교양을위한정치철학:한나아렌트 (사전녹화) (2150045901)",
+  "account_id": 27,
+  "uuid": "pDv70zHF3XN5V2clenjX6Xn3jHnb87g7fLkroiHV",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:11:32Z",
+  "course_code": "시민교양을위한정치철학:한나아렌트 (사전녹화) (2150045901)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_pDv70zHF3XN5V2clenjX6Xn3jHnb87g7fLkroiHV.ics"
   },
-  {
-    "id": 47762,
-    "name": "창의융합인재되기3code전략 (사전녹화) (2150051201)",
-    "account_id": 27,
-    "uuid": "qnvqJ6975IDNpKFJo2bYro7kaxpQum5D7I8RqQyQ",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:11:34Z",
-    "course_code": "창의융합인재되기3code전략 (사전녹화) (2150051201)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_qnvqJ6975IDNpKFJo2bYro7kaxpQum5D7I8RqQyQ.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "online",
-    "restrict_enrollments_to_course_dates": false
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "online",
+  "restrict_enrollments_to_course_dates": false,
+  "overridden_course_visibility": ""
+ },
+ {
+  "id": 47762,
+  "name": "창의융합인재되기3code전략 (사전녹화) (2150051201)",
+  "account_id": 27,
+  "uuid": "qnvqJ6975IDNpKFJo2bYro7kaxpQum5D7I8RqQyQ",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:11:34Z",
+  "course_code": "창의융합인재되기3code전략 (사전녹화) (2150051201)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_qnvqJ6975IDNpKFJo2bYro7kaxpQum5D7I8RqQyQ.ics"
   },
-  {
-    "id": 49791,
-    "name": "한반도평화와통일 (사전녹화) (2150663403)",
-    "account_id": 27,
-    "uuid": "3dgFrTmgwmCPk0yQYmNAYL3nhMRR0C9QJ7CuMgaD",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:14:36Z",
-    "course_code": "한반도평화와통일 (사전녹화) (2150663403)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_3dgFrTmgwmCPk0yQYmNAYL3nhMRR0C9QJ7CuMgaD.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "online",
-    "restrict_enrollments_to_course_dates": false,
-    "overridden_course_visibility": ""
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "online",
+  "restrict_enrollments_to_course_dates": false
+ },
+ {
+  "id": 49791,
+  "name": "한반도평화와통일 (사전녹화) (2150663403)",
+  "account_id": 27,
+  "uuid": "3dgFrTmgwmCPk0yQYmNAYL3nhMRR0C9QJ7CuMgaD",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:14:36Z",
+  "course_code": "한반도평화와통일 (사전녹화) (2150663403)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_3dgFrTmgwmCPk0yQYmNAYL3nhMRR0C9QJ7CuMgaD.ics"
   },
-  {
-    "id": 48466,
-    "name": "확장현실디자인 (대면+사전녹화) (2150152101)",
-    "account_id": 155,
-    "uuid": "Uygw4ww0v0N4YtXXoYSrR01HXvi27BAYx69jlrgI",
-    "start_at": null,
-    "grading_standard_id": null,
-    "is_public": null,
-    "created_at": "2026-08-14T10:12:35Z",
-    "course_code": "확장현실디자인 (대면+사전녹화) (2150152101)",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 50,
-    "license": null,
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": true,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_Uygw4ww0v0N4YtXXoYSrR01HXvi27BAYx69jlrgI.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "course_format": "blended",
-    "restrict_enrollments_to_course_dates": false
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "online",
+  "restrict_enrollments_to_course_dates": false,
+  "overridden_course_visibility": ""
+ },
+ {
+  "id": 48466,
+  "name": "확장현실디자인 (대면+사전녹화) (2150152101)",
+  "account_id": 155,
+  "uuid": "Uygw4ww0v0N4YtXXoYSrR01HXvi27BAYx69jlrgI",
+  "start_at": null,
+  "grading_standard_id": null,
+  "is_public": null,
+  "created_at": "2026-08-14T10:12:35Z",
+  "course_code": "확장현실디자인 (대면+사전녹화) (2150152101)",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 50,
+  "license": null,
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": true,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_Uygw4ww0v0N4YtXXoYSrR01HXvi27BAYx69jlrgI.ics"
   },
-  {
-    "id": 14362,
-    "name": "💊 코로나19 확진 자가 신고",
-    "account_id": 1,
-    "uuid": "OXtMQM1R8CAsUXOo6EdAAySvs0Hwx9qPncW0MXAN",
-    "start_at": "2022-02-28T02:06:00Z",
-    "grading_standard_id": null,
-    "is_public": false,
-    "created_at": "2022-02-22T02:06:23Z",
-    "course_code": "💊 코로나19 확진 자가 신고",
-    "default_view": "feed",
-    "root_account_id": 1,
-    "enrollment_term_id": 2,
-    "license": "private",
-    "grade_passback_setting": null,
-    "end_at": null,
-    "public_syllabus": false,
-    "public_syllabus_to_auth": false,
-    "storage_quota_mb": 5000,
-    "is_public_to_auth_users": false,
-    "apply_assignment_group_weights": false,
-    "calendar": {
-      "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_OXtMQM1R8CAsUXOo6EdAAySvs0Hwx9qPncW0MXAN.ics"
-    },
-    "time_zone": "Asia/Seoul",
-    "blueprint": false,
-    "enrollments": [
-      {
-        "type": "student",
-        "role": "StudentEnrollment",
-        "role_id": 11,
-        "user_id": 25896,
-        "enrollment_state": "active",
-        "limit_privileges_to_course_section": false
-      }
-    ],
-    "hide_final_grades": false,
-    "workflow_state": "available",
-    "restrict_enrollments_to_course_dates": true,
-    "overridden_course_visibility": ""
-  }
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "course_format": "blended",
+  "restrict_enrollments_to_course_dates": false
+ },
+ {
+  "id": 14362,
+  "name": "💊 코로나19 확진 자가 신고",
+  "account_id": 1,
+  "uuid": "OXtMQM1R8CAsUXOo6EdAAySvs0Hwx9qPncW0MXAN",
+  "start_at": "2022-02-28T02:06:00Z",
+  "grading_standard_id": null,
+  "is_public": false,
+  "created_at": "2022-02-22T02:06:23Z",
+  "course_code": "💊 코로나19 확진 자가 신고",
+  "default_view": "feed",
+  "root_account_id": 1,
+  "enrollment_term_id": 2,
+  "license": "private",
+  "grade_passback_setting": null,
+  "end_at": null,
+  "public_syllabus": false,
+  "public_syllabus_to_auth": false,
+  "storage_quota_mb": 5000,
+  "is_public_to_auth_users": false,
+  "apply_assignment_group_weights": false,
+  "calendar": {
+   "ics": "https://canvas.ssu.ac.kr/feeds/calendars/course_OXtMQM1R8CAsUXOo6EdAAySvs0Hwx9qPncW0MXAN.ics"
+  },
+  "time_zone": "Asia/Seoul",
+  "blueprint": false,
+  "enrollments": [
+   {
+    "type": "student",
+    "role": "StudentEnrollment",
+    "role_id": 11,
+    "user_id": 0,
+    "enrollment_state": "active",
+    "limit_privileges_to_course_section": false
+   }
+  ],
+  "hide_final_grades": false,
+  "workflow_state": "available",
+  "restrict_enrollments_to_course_dates": true,
+  "overridden_course_visibility": ""
+ }
 ]
