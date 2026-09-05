@@ -19,3 +19,6 @@ if ./bin/ssu-agent sync >> "$LOG" 2>&1 && ./bin/ssu-agent materials >> "$LOG" 2>
 else
   printf '%s ✖ materials 실패 — 요약은 건너뛴다\n' "$(date '+%F %T')" >> "$LOG"
 fi
+# 손 업로드는 이 잡이 영원히 안 본다(자동 과금 0). 대신 **몇 건 남았는지는**
+# 남긴다 — 은지가 올려놓고 잊으면 아무도 안 알려주기 때문이다. 돈 0·네트워크 0.
+./bin/ssu-agent status >> "$LOG" 2>&1 || true
