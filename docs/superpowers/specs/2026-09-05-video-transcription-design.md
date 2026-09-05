@@ -32,6 +32,9 @@ README 는 *"`faster-whisper` 전사 → 같은 LLM 경로. **추출만 붙이�
 3. **실행 창** — 03:00 잡, 실행당 시간 상한.
 4. **비용** — 전사는 로컬($0), LLM 은 **요약에만.**
 5. **재개 단위** — **파일.** 세그먼트 재개는 실측 전에 사지 않는다.
+6. **상태 뷰와 트리거를 V1 에 넣는다** — `status`(자료+영상 통합)와
+   `transcribe --background`. 잠금은 어차피 필요하고(크론·수동 충돌),
+   상태 뷰가 없으면 확인을 `tail -f state/cron.log` 로 하게 된다. (§8)
 
 ## 3. 구조
 
@@ -61,6 +64,9 @@ movie item ──content.php──> <media_uri> (CDN mp4)
 | `transcribe_file(path, model)` | faster-whisper 호출 → 세그먼트 목록. **`faster_whisper` 는 이 함수 안에서만 import** |
 | `to_markdown(segments, meta)` | `[MM:SS] 문장` 줄들 + 앞머리 메타 |
 | `run(semester, ...)` | 위를 엮고 예산·장부·정리를 진다 |
+| `status(semester)` | 장부를 세어 진행상황 dict. **순수 함수** — 네트워크·LLM 안 탐 (§8.2) |
+| `pending(snap, semester)` | 아직 전사 안 된 영상 목록. `🆕` 줄의 근거 (§8.2) |
+| `lock()` | `state/transcribe.lock` `flock`. 크론과 수동 실행의 충돌을 막는다 (§8.4) |
 
 전사본을 쓴 뒤 `meta.json` 의 `items[{content_id}]` 에 **`file: "{안전제목}.md"`**
 로 등록한다. `summarize._targets` 가 이 값을 보고 전사본을 집으므로 **둘은 계약이다** —
@@ -138,17 +144,69 @@ state/tmp/{content_id}.mp4  ← 작업 중에만. 성공하면 삭제
 
 `doctor` 에 설치 여부 한 줄 추가.
 
-## 8. CLI
+## 8. CLI · 상태 뷰 · 트리거
 
 ```bash
-ssu-agent transcribe                 # 예산 안에서 돈다
+ssu-agent transcribe                 # 예산 안에서 돈다 (크론이 부르는 것)
 ssu-agent transcribe --dry-run       # 대상만 센다. 네트워크·모델 안 탐
 ssu-agent transcribe --limit 1       # 실측용. 1개만
-ssu-agent transcribe --model medium  # 모델 덮어쓰기 (기본값은 TRANSCRIBE_MODEL, 미설정 시 small)
+ssu-agent transcribe --model medium  # 모델 덮어쓰기 (기본 TRANSCRIBE_MODEL, 미설정 시 small)
+ssu-agent transcribe --background    # 즉시 반환. 백그라운드로 계속 돈다
+ssu-agent status                     # 진행상황. 네트워크·LLM 안 탄다
 ```
 
-`refresh` 에는 **아직 안 붙인다.** `refresh` 는 코코봇이 부르는 대화형 입구인데
-전사는 시간 단위라 foreground 상한(600초)을 넘는다. 크론 전용으로 시작한다.
+### 8.1 왜 동기 실행이 불가능한가
+
+`small` 기준 58분 강의가 **약 23분**이다. 코코봇 foreground 상한은
+**600초(10분)** 다 — **영상 한 개도 대화 안에서 못 끝낸다.** 그래서 트리거는
+반드시 "시작했다"만 답하고 빠져야 한다.
+
+### 8.2 `status` — 자료와 영상을 **같이** 본다
+
+영상만의 문제가 아니다. **PDF 요약도 지금 진행상황을 볼 방법이 없다** —
+2026-09-02 에 OpenAI 429 로 5건이 실패했을 때 `state/cron.log` 를 직접
+뒤져야 했다. 영상용을 따로 만들면 같은 걸 두 번 만드는 셈이라 **통합 뷰**로 간다.
+
+`.progress/*.json` 과 `meta.json`, 스냅샷만 읽는다. **네트워크도 LLM 도 안 탄다.**
+
+```
+📊 요약 진행상황 (2026-2)
+  자료 PDF   완료 3 · 대기 14(미공개) · 실패 0 · 스캔불가 2
+  동영상     완료 0 · 대기 37 · 실패 0
+  🆕 새로 올라온 미전사 강의 4개 (확장현실 2·3주차, 선대 2주차 …)
+  마지막 실행 2026-09-06 03:00 · 상한에 걸려 중단(다음 새벽 이어받음)
+```
+
+- `status(semester)` — 순수 함수. 장부를 세어 dict 를 낸다
+- `pending(snap, semester)` — 아직 전사 안 된 영상 목록 (`🆕` 줄의 근거)
+- `--json` 으로 코코봇이 받아간다. 텍스트는 그대로 전송 가능하게 (`brief` 규약)
+
+### 8.3 트리거 — 백그라운드 시작
+
+```
+"요약 안 된 강의 있어? 있으면 돌려줘"
+→ 미전사 4개 찾았어. 백그라운드로 시작했어 (예상 ~1시간 20분).
+   "진행상황 봐줘" 로 확인해.
+```
+
+예상 시간은 `duration` 합 ÷ 실측 배속으로 낸다 — **실측값이 없으면 추정임을
+밝힌다**(`≈`, `brief` 가 영상 길이에 쓰는 규약과 같다).
+
+### 8.4 🔴 잠금은 선택이 아니다
+
+03:00 크론이 도는 중에 은지가 수동으로 부르면 **같은 파일을 둘이 건드린다.**
+`state/transcribe.lock` 에 `flock` 을 건다 (`study.py` 가 vault 에 쓰는 것과 같은 이유).
+
+- 이미 잡혀 있으면 **실행하지 않고** "이미 돌고 있어. 진행상황 봐줘" 로 답한다
+- 커널이 자동 해제하므로 프로세스가 죽어도 잠금이 남지 않는다
+- 잠금 획득 실패는 **에러가 아니다** — 크론은 조용히 빠지고 다음 주기에 다시 온다
+
+### 8.5 `refresh` 에는 여전히 안 붙인다
+
+`refresh` 는 ①수집 →②vault →③자료 →④요약을 **동기로** 도는 대화형 입구다.
+전사를 여기 끼우면 상한을 넘긴다. 코코봇은 대신 `status` 와
+`transcribe --background` 를 **따로** 부른다 — 스킬에 순서를 적지 않는다는
+기존 규약(`refresh.py` 참조)은 그대로다.
 
 ## 9. 테스트
 
@@ -161,6 +219,9 @@ ssu-agent transcribe --model medium  # 모델 덮어쓰기 (기본값은 TRANSCR
 - 예산 — 상한 초과 시 중단하고 `budget_hit`, 장부에 남는가
 - 정리 — 성공 시 mp4 삭제 · 실패 시 보존 · `state/tmp/` 총량 상한 초과 시 오래된 것부터 삭제
 - `summarize._targets` — 전사본 `.md` 를 잡는가, `looks_scanned` 를 안 타는가
+- `status` — 장부 조합별 집계(완료·대기·실패·스캔불가). 빈 `data/` 에서도 안 죽는가
+- `pending` — 전사된 것을 빼고 남기는가. 미개봉·주차 없음 배제
+- 잠금 — 이미 잡혀 있으면 실행하지 않고 그 사실을 알리는가(에러 아님)
 - 통합 — 가짜 전사기 주입해 mp4 → markdown → summary.md 전 구간
 
 ## 10. 첫 걸음은 실측
@@ -179,5 +240,5 @@ ssu-agent transcribe --model medium  # 모델 덮어쓰기 (기본값은 TRANSCR
 
 - **세그먼트 단위 재개** — 위 참조. 실측 후 필요하면
 - **화자 분리·슬라이드 OCR** — 요약 품질에 기여가 불확실하다
-- **`refresh` 배선** — foreground 상한 초과
+- **`refresh` 에 전사 끼우기** — foreground 상한 초과. 코코봇은 `status` 와 `transcribe --background` 를 따로 부른다 (§8.5)
 - **영상 보관** — 목적은 텍스트다
