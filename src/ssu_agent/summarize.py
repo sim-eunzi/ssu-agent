@@ -31,6 +31,7 @@ import json
 import os
 import re
 import time
+import unicodedata
 from datetime import datetime
 
 from .config import DATA_DIR, KST
@@ -258,8 +259,46 @@ def call_llm(prompt, system=SYSTEM, model=None, effort=None, max_tokens=4000):
 
 
 # ------------------------------------------------------------------ 대상
-def _targets(semester, root=None):
-    """(주차디렉터리, content_id, 파일명) — 받아둔 PDF 전부."""
+_SOURCES = ("ledger", "manual")
+
+
+def _collected_files(wd):
+    """`.progress` 를 대체 장부로 읽는다 — manual- 이 아닌 키의 레코드에 올라온
+    파일명은 **수집본**이다. meta.json 이 깨졌을 때만 쓴다."""
+    out = set()
+    d = progress_dir(wd)
+    try:
+        names = sorted(p.name for p in d.iterdir())
+    except OSError:
+        return out
+    for n in names:
+        if not n.endswith(".json") or n.startswith("manual-"):
+            continue
+        try:
+            rec = json.loads((d / n).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        f = rec.get("file") or ""
+        if f:
+            out.add(unicodedata.normalize("NFC", f))
+    return out
+
+
+def _targets(semester, root=None, sources=("ledger",)):
+    """(주차디렉터리, content_id, 파일명, meta) — 요약 대상.
+
+    sources:
+      "ledger"  meta.json items 의 .pdf 이고 materials/{f} 가 있는 것
+      "manual"  장부 밖 materials/*.pdf. content_id = "manual-{파일명}"
+
+    🔴 기본값이 ("ledger",) 인 것이 자동 과금 0 계약이다 — 03:00 cron 과
+    사람이 안 시킨 모든 경로는 손 업로드를 영원히 안 본다.
+    Phase 4 가 "transcript" 를 여기 한 줄로 더한다.
+    """
+    bad = [s for s in sources if s not in _SOURCES]
+    if bad:
+        raise ValueError("모르는 source: " + ", ".join(bad))
+    want = set(sources)
     base = (root or DATA_DIR) / semester
     out = []
     if not base.is_dir():
@@ -268,12 +307,39 @@ def _targets(semester, root=None):
         for wd in sorted(p for p in course.iterdir() if p.is_dir()):
             try:
                 meta = json.loads((wd / "meta.json").read_text(encoding="utf-8"))
+                broken = False
             except (OSError, ValueError):
-                continue
+                if "manual" not in want:
+                    continue          # 지금과 같은 동작 — 이 주차를 건너뛴다
+                meta, broken = {}, True
+
+            ledger = set()
             for cid, rec in sorted((meta.get("items") or {}).items()):
                 f = rec.get("file") or ""
-                if f.lower().endswith(".pdf") and (wd / "materials" / f).exists():
+                if f:
+                    ledger.add(unicodedata.normalize("NFC", f))
+                if ("ledger" in want and f.lower().endswith(".pdf")
+                        and (wd / "materials" / f).exists()):
                     out.append((wd, cid, f, meta))
+            if broken:
+                # 장부를 못 읽었다. 이미 요약 장부에 있는 파일은 수집본이다 —
+                # 이걸 안 지키면 요약된 LMS PDF 가 manual- 키로 다시 요약된다.
+                ledger |= _collected_files(wd)
+
+            if "manual" not in want:
+                continue
+            md = wd / "materials"
+            if not md.is_dir():
+                continue
+            for p in sorted(md.iterdir()):
+                n = p.name
+                if n.startswith(".") or not p.is_file():
+                    continue
+                if not n.lower().endswith(".pdf"):
+                    continue                      # pptx·zip 은 범위 밖
+                if unicodedata.normalize("NFC", n) in ledger:
+                    continue
+                out.append((wd, "manual-" + n, n, meta))
     return out
 
 
@@ -317,10 +383,10 @@ def _add_usage(res, rec):
 
 
 def run(semester, extract=extract_pdf, llm=call_llm, chunk_size=CHUNK_CHARS,
-        max_calls=MAX_CALLS, root=None, log=print):
+        max_calls=MAX_CALLS, root=None, log=print, sources=("ledger",)):
     res = {"done": 0, "skipped": 0, "failed": 0, "unsupported": 0,
            "calls": 0, "budget_hit": False, "in_tokens": 0, "out_tokens": 0}
-    for wd, cid, fname, meta in _targets(semester, root):
+    for wd, cid, fname, meta in _targets(semester, root, sources):
         pr = load_progress(wd, cid)
         if pr.get("status") in ("done", "unsupported_scanned"):
             res["skipped"] += 1
@@ -406,10 +472,11 @@ def run(semester, extract=extract_pdf, llm=call_llm, chunk_size=CHUNK_CHARS,
     return res
 
 
-def estimate(semester, extract=extract_pdf, chunk_size=CHUNK_CHARS, root=None):
+def estimate(semester, extract=extract_pdf, chunk_size=CHUNK_CHARS, root=None,
+             sources=("ledger",)):
     """키 없이 도는 눈대중. 실제 청구서가 아니다."""
     e = {"docs": 0, "unsupported": 0, "skipped": 0, "chars": 0, "chunks": 0}
-    for wd, cid, fname, _meta in _targets(semester, root):
+    for wd, cid, fname, _meta in _targets(semester, root, sources):
         if load_progress(wd, cid).get("status") in ("done", "unsupported_scanned"):
             e["skipped"] += 1
             continue

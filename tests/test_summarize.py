@@ -205,5 +205,158 @@ class Estimate(unittest.TestCase):
             self.assertEqual(e["unsupported"], 1)
 
 
+class TargetsSources(unittest.TestCase):
+    """🔴 대상 선정은 sources 하나로 정한다. 기본값은 장부만 —
+    여기가 새면 03:00 cron 이 손 업로드를 LLM 에 보낸다(자동 과금 0 계약)."""
+
+    def _mk(self, tmp):
+        d = wk(tmp)                                  # 장부에 강의.pdf 하나
+        m = d / "materials"
+        (m / "손PDF.pdf").write_bytes(b"%PDF-1.7")
+        (m / "교재.pptx").write_bytes(b"PK\x03\x04")
+        (m / ".DS_Store").write_bytes(b"x")
+        return d
+
+    def _names(self, tmp, **kw):
+        return sorted(f for _wd, _cid, f, _m
+                      in sm._targets("2026-2", root=pathlib.Path(tmp), **kw))
+
+    def test_default_is_ledger_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._mk(tmp)
+            self.assertEqual(self._names(tmp), ["강의.pdf"])
+
+    def test_manual_only_skips_ledger(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._mk(tmp)
+            self.assertEqual(self._names(tmp, sources=("manual",)), ["손PDF.pdf"],
+                             "'올린 것만' 을 표현할 수 있어야 상한 순서 문제가 사라진다")
+
+    def test_both_sources(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._mk(tmp)
+            self.assertEqual(self._names(tmp, sources=("ledger", "manual")),
+                             ["강의.pdf", "손PDF.pdf"])
+
+    def test_manual_content_id_prefix(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._mk(tmp)
+            got = sm._targets("2026-2", root=pathlib.Path(tmp), sources=("manual",))
+            self.assertEqual(got[0][1], "manual-손PDF.pdf",
+                             "LMS content_id 는 숫자라 이 접두사와 안 겹친다")
+
+    def test_unknown_source_raises(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._mk(tmp)
+            with self.assertRaises(ValueError):
+                sm._targets("2026-2", root=pathlib.Path(tmp), sources=("전사본",))
+
+    def test_pptx_and_dotfile_excluded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._mk(tmp)
+            names = self._names(tmp, sources=("ledger", "manual"))
+            self.assertNotIn("교재.pptx", names)
+            self.assertNotIn(".DS_Store", names)
+
+    def test_nfd_filename_does_not_leak_to_manual(self):
+        """macOS 왕복이 NFD 를 만든다. 정규화를 빠뜨리면 장부 파일이 '장부 밖'으로
+        갈려 같은 PDF 를 두 번 요약한다 — 돈이 두 배다."""
+        import unicodedata
+        with tempfile.TemporaryDirectory() as tmp:
+            d = wk(tmp)
+            nfd = unicodedata.normalize("NFD", "강의.pdf")
+            if nfd != "강의.pdf":
+                (d / "materials" / "강의.pdf").rename(d / "materials" / nfd)
+            got = sm._targets("2026-2", root=pathlib.Path(tmp),
+                              sources=("ledger", "manual"))
+            self.assertEqual([c for _w, c, _f, _m in got if c.startswith("manual-")],
+                             [])
+
+    def test_broken_meta_keeps_manual_and_protects_collected(self):
+        """🔴 장부가 깨졌다고 '전부 장부 밖'으로 보면, 이미 요약된 수집본까지
+        manual- 키로 다시 요약된다(돈 두 배). .progress 를 대체 장부로 쓴다."""
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._mk(tmp)
+            sm.save_progress(d, "cid1", {"file": "강의.pdf", "status": "done"})
+            (d / "meta.json").write_text("{깨짐", encoding="utf-8")
+            got = sm._targets("2026-2", root=pathlib.Path(tmp),
+                              sources=("ledger", "manual"))
+            names = sorted(f for _w, _c, f, _m in got)
+            self.assertEqual(names, ["손PDF.pdf"], "수집본은 대체 장부가 지킨다")
+            self.assertEqual(got[0][3], {}, "meta 는 빈 dict 로 넘어간다")
+
+    def test_broken_meta_still_retries_failed_manual(self):
+        """실패한 손 업로드는 키가 manual- 이라 대체 장부 규칙에 안 걸린다."""
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._mk(tmp)
+            sm.save_progress(d, "manual-손PDF.pdf",
+                             {"file": "손PDF.pdf", "status": "failed"})
+            (d / "meta.json").write_text("{깨짐", encoding="utf-8")
+            names = self._names(tmp, sources=("manual",))
+            self.assertIn("손PDF.pdf", names, "재시도가 막히면 안 된다")
+
+    def test_broken_meta_with_ledger_only_skips_week(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._mk(tmp)
+            (d / "meta.json").write_text("{깨짐", encoding="utf-8")
+            self.assertEqual(self._names(tmp), [], "지금과 같은 동작")
+
+
+class RunSources(unittest.TestCase):
+    def _week(self, tmp):
+        d = wk(tmp)
+        (d / "materials" / "손PDF.pdf").write_bytes(b"%PDF-1.7")
+        return d
+
+    def _run(self, tmp, **kw):
+        with mock.patch.object(sm, "DATA_DIR", pathlib.Path(tmp)):
+            return sm.run("2026-2",
+                          extract=lambda p: ("가" * 2000, {"pages": 13}),
+                          llm=lambda prompt, **k: "요약본",
+                          log=lambda *a: None, **kw)
+
+    def test_default_does_not_touch_manual(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._week(tmp)
+            res = self._run(tmp)
+            self.assertEqual(res["done"], 1)
+            self.assertEqual(sm.load_progress(d, "manual-손PDF.pdf"), {},
+                             "장부 기록조차 안 생긴다")
+
+    def test_manual_only_leaves_ledger_alone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._week(tmp)
+            res = self._run(tmp, sources=("manual",))
+            self.assertEqual(res["done"], 1)
+            self.assertEqual(res["skipped"], 0, "장부는 대상이 아니라 세지도 않는다")
+            self.assertEqual(sm.load_progress(d, "cid1"), {})
+            rec = sm.load_progress(d, "manual-손PDF.pdf")
+            self.assertEqual(rec["status"], "done")
+            self.assertEqual(rec["file"], "손PDF.pdf",
+                             "대시보드가 rec.file 로 매칭한다 — 키 합성과 무관해야 한다")
+            self.assertIn("## 손PDF.pdf",
+                          (d / "summary.md").read_text(encoding="utf-8"))
+
+    def test_second_run_skips(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._week(tmp)
+            self._run(tmp, sources=("manual",))
+            res = self._run(tmp, sources=("manual",))
+            self.assertEqual((res["done"], res["skipped"]), (0, 1))
+
+    def test_estimate_respects_sources(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._week(tmp)
+            with mock.patch.object(sm, "DATA_DIR", pathlib.Path(tmp)):
+                ex = lambda p: ("가" * 2000, {"pages": 13})
+                self.assertEqual(sm.estimate("2026-2", extract=ex)["docs"], 1)
+                self.assertEqual(
+                    sm.estimate("2026-2", extract=ex, sources=("manual",))["docs"], 1)
+                self.assertEqual(
+                    sm.estimate("2026-2", extract=ex,
+                                sources=("ledger", "manual"))["docs"], 2,
+                    "어림과 실행이 갈리면 어림이 쓸모없다")
+
+
 if __name__ == "__main__":
     unittest.main()
