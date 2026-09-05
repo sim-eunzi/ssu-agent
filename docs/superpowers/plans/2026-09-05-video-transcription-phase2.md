@@ -498,6 +498,12 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 03:00 크론이 도는 중에 은지가 수동으로 부르면 **같은 파일을 둘이 건드린다.** 잠금 획득 실패는 **에러가 아니다** — 크론은 조용히 빠지고 다음 주기에 다시 온다 (스펙 §8.4).
 
+🔴 **`ssu_agent.lock.held` 를 쓴다 (2026-09-06 신설). 새로 만들지 마라.**
+`src/ssu_agent/lock.py` 가 이미 `state/{name}.lock` flock 헬퍼를 낸다
+(`docs/superpowers/specs/2026-09-06-summarize-entry-design.md` §7) — 아래 Step들이
+새로 만들라는 `lock.py`/`test_lock.py` 는 **이미 있으므로 건너뛰고**, `cmd_transcribe`
+에서 `lock.held("transcribe")` 를 그대로 불러 쓴다.
+
 **Files:**
 - Create: `src/ssu_agent/lock.py`
 - Create: `tests/test_lock.py`

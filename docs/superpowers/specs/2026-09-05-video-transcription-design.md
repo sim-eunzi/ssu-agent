@@ -75,9 +75,13 @@ movie item ──content.php──> <media_uri> (CDN mp4)
 | `transcribe_file(path, model)` | faster-whisper 호출 → 세그먼트 목록. **`faster_whisper` 는 이 함수 안에서만 import** |
 | `to_markdown(segments, meta)` | `[MM:SS] 문장` 줄들 + 앞머리 메타 |
 | `run(semester, ...)` | 위를 엮고 예산·장부·정리를 진다 |
-| `status(semester)` | 장부를 세어 진행상황 dict. **순수 함수** — 네트워크·LLM 안 탐 (§8.2) |
-| `pending(snap, semester)` | 아직 전사 안 된 영상 목록. `🆕` 줄의 근거 (§8.2) |
 | `lock()` | `state/transcribe.lock` `flock`. 크론과 수동 실행의 충돌을 막는다 (§8.4) |
+
+🔴 **`status(semester)`·`pending(snap, semester)` 는 `transcribe.py` 소관이 아니다**
+(2026-09-06, `docs/superpowers/specs/2026-09-06-summarize-entry-design.md`). 자료
+현황을 전사 모듈이 소유하면 계층이 뒤집힌다 — **`status.py`(신설)가 두 소유한다.**
+`status.collect()` 가 자료(장부·손 업로드)를 세는 것과 같은 자리에서 `video` 칸을
+채운다. `pending()` 은 그 밑에서 `🆕` 줄의 근거로 쓰인다. 아래 §8.2 참조.
 
 전사본을 쓴 뒤 `meta.json` 의 `items[{content_id}]` 에 **`file: "{안전제목}.md"`**
 로 등록한다. `summarize._targets` 가 이 값을 보고 전사본을 집으므로 **둘은 계약이다** —
@@ -181,14 +185,27 @@ ssu-agent status                     # 진행상황. 네트워크·LLM 안 탄�
 `.progress/*.json` 과 `meta.json`, 스냅샷만 읽는다. **네트워크도 LLM 도 안 탄다.**
 
 ```
-📊 요약 진행상황 (2026-2)
-  자료 PDF   완료 3 · 대기 14(미공개) · 실패 0 · 스캔불가 2
-  동영상     완료 0 · 대기 37 · 실패 0
+📊 요약 현황 (2026-2)
+  자동 수집   완료 3 · 미요약 5 · 실패 0 · 스캔불가 2
+  직접 올림   완료 1 · 미요약 2 · 실패 0
+  동영상      완료 0 · 대기 37 · 실패 0
   🆕 새로 올라온 미전사 강의 4개 (확장현실 2·3주차, 선대 2주차 …)
-  마지막 실행 2026-09-06 03:00 · 상한에 걸려 중단(다음 새벽 이어받음)
+  마지막 장부 갱신 2026-09-05 03:14
 ```
 
-- `status(semester)` — 순수 함수. 장부를 세어 dict 를 낸다
+🔴 **「직접 올림」 칸은 2026-09-06 신설이다** — 대시보드로 손 업로드한 자료가
+`_targets(sources=("manual",))` 로 요약 대상이 됐고(§9), `status.py` 가 자료(장부·
+손 업로드)와 영상을 **같이** 센다.
+
+🔴 **`미요약` 은 「받아둔 것 중 안 된 것」이지, 위 예시의 `대기 14(미공개)` 와 다르다.**
+아직 안 받은 자료는 `materials/` 에 없어서 `_targets` 가 모른다 — 세는 근거를
+`_targets` 하나로 고정한 대가다. 미공개 자료 수는 `materials --dry-run` 소관.
+같은 이유로 위 *"상한에 걸려 중단(다음 새벽 이어받음)"* 줄은 **뺐다** — 장부만
+봐서는 알 수 없는 문장을 화면에 쓰면 그게 다음 버그다. 정직하게 셀 수 있는
+`마지막 장부 갱신` 값만 남긴다.
+
+- `status(semester)` — 순수 함수. 장부를 세어 dict 를 낸다. **`status.py` 소관**
+  (위 §3 참조) — `video` 칸만 이 스펙이 채운다
 - `pending(snap, semester)` — 아직 전사 안 된 영상 목록 (`🆕` 줄의 근거)
 - `--json` 으로 코코봇이 받아간다. 텍스트는 그대로 전송 가능하게 (`brief` 규약)
 
@@ -207,6 +224,10 @@ ssu-agent status                     # 진행상황. 네트워크·LLM 안 탄�
 
 03:00 크론이 도는 중에 은지가 수동으로 부르면 **같은 파일을 둘이 건드린다.**
 `state/transcribe.lock` 에 `flock` 을 건다 (`study.py` 가 vault 에 쓰는 것과 같은 이유).
+
+🔴 **`lock.py` 가 이미 있다** (2026-09-06, `src/ssu_agent/lock.py` —
+`docs/superpowers/specs/2026-09-06-summarize-entry-design.md` §7). `held("transcribe")`
+를 쓴다 — 새로 만들지 마라.
 
 - 이미 잡혀 있으면 **실행하지 않고** "이미 돌고 있어. 진행상황 봐줘" 로 답한다
 - 커널이 자동 해제하므로 프로세스가 죽어도 잠금이 남지 않는다
