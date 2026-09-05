@@ -5,6 +5,7 @@
 스펙: docs/superpowers/specs/2026-09-05-video-transcription-design.md
 """
 import io
+import json
 import os
 import sys
 import tempfile
@@ -212,6 +213,54 @@ class TestTranscribeFile(unittest.TestCase):
         import ssu_agent.transcribe as t
 
         importlib.reload(t)     # 예외 없이 통과하면 된다
+
+
+class TestRunOne(unittest.TestCase):
+    """네트워크·모델을 주입받아 전 구간을 돈다."""
+
+    def test_end_to_end_with_fakes(self):
+        job = {"stem": "정치철학-한나아렌트", "week": 1,
+               "content_id": "68b27aeb26a32", "title": "1-2 한나 아렌트",
+               "duration": 3463.98,
+               "source": "https://commons.ssu.ac.kr/em/68b27aeb26a32"}
+
+        def fetch(url, dest):
+            open(dest, "wb").write(b"fake mp4")
+            return 8
+
+        def transcriber(path):
+            return [{"start": 0.0, "end": 2.0, "text": "안녕하세요"}]
+
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            res = transcribe.run_one(job, "2026-2", root=root,
+                                     fetch=fetch, transcriber=transcriber,
+                                     resolve=lambda cid: "http://x/v.mp4",
+                                     log=lambda *a: None)
+            self.assertTrue(res["ok"])
+            md = root / "2026-2" / "정치철학-한나아렌트" / "W01" / "markdown" / "1-2 한나 아렌트.md"
+            self.assertTrue(md.exists())
+            self.assertIn("[00:00] 안녕하세요", md.read_text(encoding="utf-8"))
+
+            # meta.json 계약 — summarize._targets 가 이 값을 본다
+            meta = json.loads((root / "2026-2" / "정치철학-한나아렌트" / "W01"
+                               / "meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["items"]["68b27aeb26a32"]["file"],
+                             "1-2 한나 아렌트.md")
+
+    def test_mp4_is_deleted_on_success(self):
+        job = {"stem": "선형대수", "week": 1, "content_id": "cid1",
+               "title": "선대 1-1", "duration": 60, "source": "s"}
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            tmp = root / "tmp"
+            transcribe.run_one(
+                job, "2026-2", root=root, tmp_dir=tmp,
+                resolve=lambda cid: "http://x/v.mp4",
+                fetch=lambda u, p: (open(p, "wb").write(b"x"), 1)[1],
+                transcriber=lambda p: [{"start": 0, "end": 1, "text": "가"}],
+                log=lambda *a: None)
+            self.assertEqual(list(tmp.glob("*.mp4")), [])
 
 
 if __name__ == "__main__":

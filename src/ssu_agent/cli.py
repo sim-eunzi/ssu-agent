@@ -198,6 +198,24 @@ def cmd_materials(a):
     return 0
 
 
+def cmd_transcribe(a):
+    """Phase 1 — 영상 1개 실측용. 예산·장부·잠금은 Phase 2 에서 붙는다."""
+    from . import transcribe as tr
+    cfg = get()
+    snap = _snapshot(refresh=a.refresh)
+    jobs = tr.plan(snap)
+    print("전사 대상 %d개" % len(jobs))
+    if a.dry_run:
+        for j in jobs[:a.limit or len(jobs)]:
+            print("  %-22s W%02d %-30s %.0f분"
+                  % (j["stem"], j["week"], (j["title"] or "")[:30],
+                     (j["duration"] or 0) / 60))
+        return 0
+    for j in jobs[:a.limit or len(jobs)]:
+        tr.run_one(j, cfg.semester, model=a.model)
+    return 0
+
+
 def cmd_summarize(a):
     """자료 요약. --estimate 는 키 없이 돌아 비용만 어림한다."""
     cfg = get()
@@ -348,6 +366,13 @@ def build_parser():
     ma.add_argument("--dry-run", action="store_true", help="받을 목록만 보인다")
     ma.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
     ma.set_defaults(func=cmd_materials)
+
+    tc = sub.add_parser("transcribe", help="동영상 강의 전사 (Phase 1: 실측용)")
+    tc.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
+    tc.add_argument("--dry-run", action="store_true", help="대상만 센다")
+    tc.add_argument("--limit", type=int, default=0, help="N개만 처리")
+    tc.add_argument("--model", default=None, help="기본 TRANSCRIBE_MODEL(small)")
+    tc.set_defaults(func=cmd_transcribe)
 
     su = sub.add_parser("summarize")
     su.add_argument("--models", action="store_true",

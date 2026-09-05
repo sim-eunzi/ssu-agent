@@ -14,11 +14,16 @@
 스펙: docs/superpowers/specs/2026-09-05-video-transcription-design.md
 """
 
+import json
 import os
 import re
+import time
 import urllib.request
+from datetime import datetime
+from pathlib import Path
 
 from . import materials
+from .config import DATA_DIR, KST, STATE_DIR
 from .net import UA
 
 # 🔴 `main_media` 에는 media_uri 가 여럿이다 — desktop>html5(progressive, CDN),
@@ -168,3 +173,89 @@ def transcribe_file(path, model=None, language="ko"):
     m = _load_model(model or MODEL)
     segments, _info = m.transcribe(str(path), language=language, vad_filter=True)
     return [{"start": s.start, "end": s.end, "text": s.text} for s in segments]
+
+
+# ------------------------------------------------------------------ 실행
+def resolve_media(content_id):
+    """content.php → 받을 수 있는 mp4 URL.
+
+    `materials.fetch_xml` 을 그대로 쓴다 — `Referer` 를 붙이는 곳이 여기 말고
+    또 생기면 안 된다.
+    """
+    return parse_media_uri(materials.fetch_xml(content_id))
+
+
+def week_dir(semester, stem, week, root=None):
+    return Path(root or DATA_DIR) / semester / stem / ("W%02d" % int(week))
+
+
+def _update_meta(wd, job, fname):
+    """`summarize._targets` 가 읽는 계약. 확장자를 바꾸면 요약이 조용히 안 돈다."""
+    p = wd / "meta.json"
+    try:
+        meta = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        meta = {}
+    meta.setdefault("course", job["stem"])
+    meta.setdefault("week", int(job["week"]))
+    meta.setdefault("items", {})
+    meta["items"][job["content_id"]] = {
+        "file": fname, "title": job.get("title"),
+        "source": job.get("source"), "kind": "video",
+        "duration": job.get("duration"),
+        "fetched_at": datetime.now(KST).isoformat(timespec="seconds"),
+    }
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(meta, ensure_ascii=False, indent=1, sort_keys=True) + "\n",
+                 encoding="utf-8")
+
+
+def run_one(job, semester, root=None, tmp_dir=None, resolve=None,
+            fetch=None, transcriber=None, model=None, log=print):
+    """영상 하나를 받아 전사해 `markdown/{제목}.md` 로 떨군다.
+
+    네트워크·모델을 주입받는다 — 테스트가 전 구간을 돌 수 있어야 한다.
+    """
+    resolve = resolve or resolve_media
+    fetch = fetch or (lambda url, dest: download(url, dest, log=log))
+    transcriber = transcriber or (lambda p: transcribe_file(p, model=model))
+
+    wd = week_dir(semester, job["stem"], job["week"], root)
+    stem = safe_stem(job.get("title"), job["content_id"])
+    md_path = wd / "markdown" / (stem + ".md")
+    if md_path.exists():
+        log("  ⤼ %s — 이미 전사됨" % stem)
+        return {"ok": True, "md_path": str(md_path), "seconds": 0.0,
+                "chars": len(md_path.read_text(encoding="utf-8"))}
+
+    url = resolve(job["content_id"])
+    if not url:
+        log("  ✖ %s — media_uri 를 못 찾았다" % stem)
+        return {"ok": False, "md_path": None, "seconds": 0.0, "chars": 0}
+
+    tmp = Path(tmp_dir or (STATE_DIR / "tmp"))
+    tmp.mkdir(parents=True, exist_ok=True)
+    mp4 = tmp / (job["content_id"] + ".mp4")
+
+    t0 = time.time()
+    fetch(url, str(mp4))
+    segs = transcriber(str(mp4))
+    took = time.time() - t0
+
+    md = to_markdown(segs, {"source": job.get("source"),
+                            "duration": job.get("duration"),
+                            "model": model or MODEL,
+                            "at": datetime.now(KST).strftime("%Y-%m-%d")})
+    md_path.parent.mkdir(parents=True, exist_ok=True)
+    md_path.write_text(md, encoding="utf-8")
+    _update_meta(wd, job, md_path.name)
+
+    try:                       # 성공했으면 영상은 필요 없다. 원하는 건 텍스트다.
+        mp4.unlink()
+    except OSError:
+        pass
+
+    dur = float(job.get("duration") or 0)
+    log("  ✓ %s — %.0f초 걸림 (%.1f× 실시간) · %d자"
+        % (stem, took, (dur / took) if took else 0, len(md)))
+    return {"ok": True, "md_path": str(md_path), "seconds": took, "chars": len(md)}
