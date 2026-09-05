@@ -54,6 +54,174 @@ class Sources(unittest.TestCase):
                          ("manual",))
 
 
+class SourcesReachSummarize(unittest.TestCase):
+    """🔴 `cli._sources(a)` 를 번역만 하고 안 넘기면 조용히 통과한다 — 예전에
+    `summarize.run(...)`/`summarize.estimate(...)` 에서 `sources=_sources(a)` 가
+    지워졌을 때도 전체 스위트가 통과했다. 실제로 넘어가는 튜플을 스파이로 잡는다."""
+
+    def _spy_run(self):
+        calls = []
+        orig = cli.summarize.run
+
+        def fake(*a, **k):
+            calls.append(k)
+            return {"done": 0, "skipped": 0, "unsupported": 0, "failed": 0,
+                    "calls": 0, "budget_hit": False, "in_tokens": 0, "out_tokens": 0}
+        cli.summarize.run = fake
+        return calls, orig
+
+    def _spy_estimate(self):
+        calls = []
+        orig = cli.summarize.estimate
+
+        def fake(*a, **k):
+            calls.append(k)
+            return {"docs": 0, "chars": 0, "chunks": 0, "unsupported": 0,
+                    "skipped": 0, "est_input_tokens": 0, "est_output_tokens": 0,
+                    "est_usd": 0.0}
+        cli.summarize.estimate = fake
+        return calls, orig
+
+    def _args(self, **kw):
+        base = dict(models=False, estimate=False, limit=5,
+                    include_manual=False, manual_only=False)
+        base.update(kw)
+        return cli._Args(**base)
+
+    def test_run_default_sources(self):
+        import contextlib
+        import io
+        calls, orig = self._spy_run()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.cmd_summarize(self._args())
+        finally:
+            cli.summarize.run = orig
+        self.assertEqual(calls[0].get("sources"), ("ledger",))
+
+    def test_run_include_manual_sources(self):
+        import contextlib
+        import io
+        calls, orig = self._spy_run()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.cmd_summarize(self._args(include_manual=True))
+        finally:
+            cli.summarize.run = orig
+        self.assertEqual(calls[0].get("sources"), ("ledger", "manual"))
+
+    def test_run_manual_only_sources(self):
+        import contextlib
+        import io
+        calls, orig = self._spy_run()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.cmd_summarize(self._args(manual_only=True))
+        finally:
+            cli.summarize.run = orig
+        self.assertEqual(calls[0].get("sources"), ("manual",))
+
+    def test_estimate_default_sources(self):
+        import contextlib
+        import io
+        calls, orig = self._spy_estimate()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.cmd_summarize(self._args(estimate=True))
+        finally:
+            cli.summarize.estimate = orig
+        self.assertEqual(calls[0].get("sources"), ("ledger",))
+
+    def test_estimate_include_manual_sources(self):
+        import contextlib
+        import io
+        calls, orig = self._spy_estimate()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.cmd_summarize(self._args(estimate=True, include_manual=True))
+        finally:
+            cli.summarize.estimate = orig
+        self.assertEqual(calls[0].get("sources"), ("ledger", "manual"))
+
+    def test_estimate_manual_only_sources(self):
+        import contextlib
+        import io
+        calls, orig = self._spy_estimate()
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                cli.cmd_summarize(self._args(estimate=True, manual_only=True))
+        finally:
+            cli.summarize.estimate = orig
+        self.assertEqual(calls[0].get("sources"), ("manual",))
+
+
+class StatusDispatch(unittest.TestCase):
+    """cmd_status 가 실제로 collect/render 를 부르는지, --json 이 render 를
+    건너뛰고 collect 를 그대로 찍는지 — 여태 아무 테스트도 없었다."""
+
+    def test_plain_dispatches_collect_and_render(self):
+        import contextlib
+        import io
+        seen = {"collect": [], "render": []}
+        orig_collect, orig_render = cli.status.collect, cli.status.render
+        orig_get = cli.get
+
+        def fake_collect(sem, root=None):
+            seen["collect"].append(sem)
+            return {"semester": sem}
+
+        def fake_render(st):
+            seen["render"].append(st)
+            return "렌더된 현황\n"
+
+        cli.status.collect = fake_collect
+        cli.status.render = fake_render
+        cli.get = lambda: cli._Args(semester="2026-2")
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc = cli.cmd_status(cli._Args(json=False))
+        finally:
+            cli.status.collect, cli.status.render = orig_collect, orig_render
+            cli.get = orig_get
+        self.assertEqual(rc, 0)
+        self.assertEqual(seen["collect"], ["2026-2"])
+        self.assertEqual(seen["render"], [{"semester": "2026-2"}])
+        self.assertIn("렌더된 현황", buf.getvalue())
+
+    def test_json_dispatches_collect_only(self):
+        import contextlib
+        import io
+        import json as jsonlib
+        seen = {"collect": [], "render": []}
+        orig_collect, orig_render = cli.status.collect, cli.status.render
+        orig_get = cli.get
+
+        def fake_collect(sem, root=None):
+            seen["collect"].append(sem)
+            return {"semester": sem, "ledger": {"done": 1}}
+
+        def fake_render(st):
+            seen["render"].append(st)
+            return "안 불려야 한다\n"
+
+        cli.status.collect = fake_collect
+        cli.status.render = fake_render
+        cli.get = lambda: cli._Args(semester="2026-2")
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc = cli.cmd_status(cli._Args(json=True))
+        finally:
+            cli.status.collect, cli.status.render = orig_collect, orig_render
+            cli.get = orig_get
+        self.assertEqual(rc, 0)
+        self.assertEqual(seen["collect"], ["2026-2"])
+        self.assertEqual(seen["render"], [], "--json 은 render 를 부르지 않는다")
+        out = jsonlib.loads(buf.getvalue())
+        self.assertEqual(out, {"semester": "2026-2", "ledger": {"done": 1}})
+
+
 class Locking(unittest.TestCase):
     def test_busy_lock_exits_zero_without_running(self):
         """잠금 실패는 에러가 아니다 — 크론 로그가 매일 빨개지면 안 된다."""
