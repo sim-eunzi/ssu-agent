@@ -108,5 +108,40 @@ class Locking(unittest.TestCase):
         self.assertEqual(seen, [], "estimate 는 잠그지 않는다")
 
 
+class RefreshHasNoSummary(unittest.TestCase):
+    def test_parser_dropped_summary_flags(self):
+        p = cli.build_parser()
+        for bad in (["refresh", "--no-summary"], ["refresh", "--limit", "5"]):
+            with self.assertRaises(SystemExit):
+                p.parse_args(bad)
+
+    def test_reports_pending_line(self):
+        """🔴 fns 를 부르지 않는다 — 부르면 진짜 sync 가 돌아 네트워크를 탄다."""
+        import contextlib
+        import io
+
+        orig_run, orig_collect, orig_get = (
+            cli.refresh.run, cli.status.collect, cli.get)
+        cli.refresh.run = lambda fns, want=(): {"steps": [], "aborted": False}
+        cli.get = lambda: cli._Args(semester="2026-2")
+        cli.status.collect = lambda sem, root=None: {
+            "semester": sem,
+            "ledger": {"done": 0, "pending": 5, "failed": 0, "unsupported": 0},
+            "manual": {"done": 0, "pending": 2, "failed": 0, "unsupported": 0},
+            "video": None, "last_progress_at": None}
+        buf = io.StringIO()
+        try:
+            with contextlib.redirect_stdout(buf):
+                cli.cmd_refresh(cli._Args(no_materials=True, dry_run=True,
+                                          verbose=False))
+        finally:
+            cli.refresh.run, cli.status.collect, cli.get = (
+                orig_run, orig_collect, orig_get)
+        out = buf.getvalue()
+        self.assertIn("미요약", out)
+        self.assertIn("5", out)
+        self.assertIn("2", out)
+
+
 if __name__ == "__main__":
     unittest.main()

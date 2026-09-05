@@ -328,14 +328,16 @@ def _quiet(fn, args):
 
 
 def cmd_refresh(a):
-    """수집 → vault → 자료 → 요약. 코코봇이 부르는 입구다 (refresh.py 참고)."""
-    want = list(refresh.STEPS)
-    if a.no_summary:
-        want.remove("summary")
-    if a.no_materials:
-        want = [w for w in want if w not in ("materials", "summary")]
+    """수집 → vault → 자료. 코코봇이 부르는 입구다 (refresh.py 참고).
 
-    fresh = _Args(refresh=False, dry_run=a.dry_run, verbose=False)
+    🔴 LLM 을 부르지 않는다. 요약은 `summarize` 가 따로 진다.
+    """
+    want = list(refresh.STEPS)
+    if a.no_materials:
+        want.remove("materials")
+
+    fresh = _Args(REFRESH_STEP_FIELDS, refresh=False, dry_run=a.dry_run,
+                  verbose=False)
 
     def _sync():
         snap = sync.run(verbose=False)
@@ -353,9 +355,6 @@ def cmd_refresh(a):
         "sync": _sync,
         "vault": lambda: _quiet(cmd_vault_sync, fresh),
         "materials": lambda: _quiet(cmd_materials, fresh),
-        # 🔴 dry-run 은 estimate 로 간다. 안 그러면 "확인만 할게" 가 돈을 쓴다.
-        "summary": lambda: _quiet(cmd_summarize, _Args(
-            models=False, estimate=a.dry_run, limit=a.limit)),
     }
     res = refresh.run(fns, want=tuple(want))
     if a.verbose:
@@ -363,6 +362,10 @@ def cmd_refresh(a):
             print("--- {} ---".format(s["name"]))
             print(s.get("detail") or s["line"])
     sys.stdout.write(refresh.render(res))
+    # 현황 한 줄 — 장부만 읽으므로 공짜다. 중단됐으면 내지 않는다:
+    # 낡은 장부로 센 숫자를 보여주지 않는다.
+    if not res["aborted"]:
+        print(status.pending_line(status.collect(get().semester)))
     return 1 if res["aborted"] else 0
 
 
@@ -429,16 +432,9 @@ def build_parser():
     stp.add_argument("--json", action="store_true", help="코코봇이 받아갈 구조")
     stp.set_defaults(func=cmd_status)
 
-    rf = sub.add_parser("refresh", help="수집→vault→자료→요약 한 번에 (코코봇 입구)")
-    rf.add_argument("--no-summary", action="store_true",
-                    help="LLM 요약 건너뛰기 (비용 0)")
+    rf = sub.add_parser("refresh", help="수집→vault→자료 한 번에 (코코봇 입구)")
     rf.add_argument("--no-materials", action="store_true",
-                    help="자료 다운로드·요약 건너뛰기")
-    # 🔴 기본값을 summarize 파서와 **같이** 둔다. 여기만 None 이었을 때
-    # `_Args(limit=None)` → `run(max_calls=None)` → `calls >= None` 로 죽었다
-    # (2026-09-05). 같은 플래그에 기본값이 둘이면 언젠가 갈린다.
-    rf.add_argument("--limit", type=int, default=summarize.MAX_CALLS,
-                    help="요약 LLM 호출 상한 (기본 %d)" % summarize.MAX_CALLS)
+                    help="자료 다운로드 건너뛰기")
     rf.add_argument("--dry-run", action="store_true")
     rf.add_argument("--verbose", action="store_true", help="각 단계 원문 출력")
     rf.set_defaults(func=cmd_refresh)
