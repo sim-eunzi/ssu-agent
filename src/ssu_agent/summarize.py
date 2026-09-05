@@ -123,6 +123,18 @@ def load_progress(week_dir, content_id):
         return {}
 
 
+def load_progress_for(week_dir, content_id, filename):
+    """장부 키와 manual- 키는 같은 파일을 가리킬 수 있다.
+
+    손으로 올린 뒤 나중에 LMS 가 같은 이름으로 수집하면 content_id 만 갈린다 —
+    그대로 두면 03:00 cron 이 같은 문서를 다시 요약한다(돈 두 배).
+    """
+    rec = load_progress(week_dir, content_id)
+    if not rec and not content_id.startswith("manual-"):
+        rec = load_progress(week_dir, "manual-" + filename)
+    return rec
+
+
 def save_progress(week_dir, content_id, rec):
     d = progress_dir(week_dir)
     d.mkdir(parents=True, exist_ok=True)
@@ -382,14 +394,19 @@ def _add_usage(res, rec):
     rec["model_used"] = u.get("model")
 
 
+# 🔴 호출자가 lock.held("summarize") 안에서 부른다 (cli.cmd_summarize 참고)
 def run(semester, extract=extract_pdf, llm=call_llm, chunk_size=CHUNK_CHARS,
         max_calls=MAX_CALLS, root=None, log=print, sources=("ledger",)):
     res = {"done": 0, "skipped": 0, "failed": 0, "unsupported": 0,
            "calls": 0, "budget_hit": False, "in_tokens": 0, "out_tokens": 0}
     for wd, cid, fname, meta in _targets(semester, root, sources):
-        pr = load_progress(wd, cid)
+        pr = load_progress_for(wd, cid, fname)
         if pr.get("status") in ("done", "unsupported_scanned"):
             res["skipped"] += 1
+            if not load_progress(wd, cid):
+                # manual- 별칭에서 찾았다 — 숫자 cid 로 다시 적어 다음부터는
+                # 별칭 조회가 필요 없게 한다.
+                save_progress(wd, cid, pr)
             continue
         if res["calls"] >= max_calls:
             res["budget_hit"] = True
@@ -477,7 +494,7 @@ def estimate(semester, extract=extract_pdf, chunk_size=CHUNK_CHARS, root=None,
     """키 없이 도는 눈대중. 실제 청구서가 아니다."""
     e = {"docs": 0, "unsupported": 0, "skipped": 0, "chars": 0, "chunks": 0}
     for wd, cid, fname, _meta in _targets(semester, root, sources):
-        if load_progress(wd, cid).get("status") in ("done", "unsupported_scanned"):
+        if load_progress_for(wd, cid, fname).get("status") in ("done", "unsupported_scanned"):
             e["skipped"] += 1
             continue
         try:

@@ -20,8 +20,8 @@ _EMPTY = {"done": 0, "pending": 0, "failed": 0, "unsupported": 0}
 def _count(semester, root, sources):
     c = dict(_EMPTY)
     last = None
-    for wd, cid, _fname, _meta in summarize._targets(semester, root, sources):
-        rec = summarize.load_progress(wd, cid)
+    for wd, cid, fname, _meta in summarize._targets(semester, root, sources):
+        rec = summarize.load_progress_for(wd, cid, fname)
         s = rec.get("status")
         if s == "done":
             c["done"] += 1
@@ -83,9 +83,18 @@ def render(st):
 
 
 def pending_line(st):
-    """refresh 보고 끝에 붙는 한 줄. 장부만 읽으므로 공짜다."""
+    """refresh 보고 끝에 붙는 한 줄. 장부만 읽으므로 공짜다.
+
+    🔴 `failed` 도 세야 한다 — `summarize.run` 은 실패한 문서를 다음 실행에서
+    재시도하며 돈을 쓴다. pending 만 보면 2026-09-02 429 사고처럼 화면은
+    "미요약 없음"인데 다음 실행이 조용히 청구한다.
+    """
     a, b = st["ledger"]["pending"], st["manual"]["pending"]
-    if not a and not b:
+    f = st["ledger"]["failed"] + st["manual"]["failed"]
+    if not a and not b and not f:
         return "📊 미요약 없음"
-    return ("📊 미요약 — 자동 수집 {}건 · 직접 올림 {}건   "
+    line = ("📊 미요약 — 자동 수집 {}건 · 직접 올림 {}건   "
             "「요약해줘」 라고 하면 골라서 돌린다".format(a, b))
+    if f:
+        line += " · 실패 {}건(다음 실행이 재시도)".format(f)
+    return line

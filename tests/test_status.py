@@ -73,6 +73,18 @@ class Collect(unittest.TestCase):
             got = st.collect("2026-2", root=pathlib.Path(tmp))
             self.assertIsNotNone(got["last_progress_at"])
 
+    def test_manual_alias_counts_as_ledger_done(self):
+        """손으로 먼저 올려 manual-강의.pdf.json 이 done 인 뒤, LMS 가 같은
+        이름을 새 cid 로 등록하면 — status 는 ledger pending 이 아니라
+        ledger done 으로 봐야 한다. 아니면 화면은 '미요약 없음'인데
+        실행은 다시 청구한다."""
+        with tempfile.TemporaryDirectory() as tmp:
+            d = wk(tmp)  # meta.json 이 강의.pdf 를 cid1 로 등록
+            sm.save_progress(d, "manual-강의.pdf", {"file": "강의.pdf", "status": "done"})
+            got = st.collect("2026-2", root=pathlib.Path(tmp))
+            self.assertEqual(got["ledger"]["done"], 1)
+            self.assertEqual(got["ledger"]["pending"], 0)
+
     def test_broken_meta_does_not_crash(self):
         with tempfile.TemporaryDirectory() as tmp:
             d = wk(tmp)
@@ -112,6 +124,17 @@ class Render(unittest.TestCase):
             ledger={"done": 3, "pending": 0, "failed": 0, "unsupported": 2},
             manual={"done": 1, "pending": 0, "failed": 0, "unsupported": 0}))
         self.assertIn("미요약 없음", line)
+
+    def test_pending_line_counts_failed_even_when_pending_is_zero(self):
+        """🔴 2026-09-02 429 사고와 같은 모양 — `summarize.run` 은 실패한 문서를
+        재시도하며 돈을 쓴다. pending 이 0 이라고 '미요약 없음'을 내면
+        다음 실행이 조용히 청구하는데 방금 화면은 안전하다고 말한 셈이다."""
+        line = st.pending_line(self._st(
+            ledger={"done": 3, "pending": 0, "failed": 2, "unsupported": 0},
+            manual={"done": 1, "pending": 0, "failed": 0, "unsupported": 0}))
+        self.assertNotIn("미요약 없음", line)
+        self.assertIn("실패", line)
+        self.assertIn("2", line)
 
     def test_last_progress_at_trims_iso_offset(self):
         # summarize.now() 는 "2026-09-05T03:14:03+09:00" 형태를 낸다 —

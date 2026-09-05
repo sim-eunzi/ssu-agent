@@ -183,6 +183,73 @@ class Run(unittest.TestCase):
             self.assertEqual(len(calls), 1, "PDF 를 다시 파싱하지 않는다")
 
 
+class ManualLedgerAlias(unittest.TestCase):
+    """손으로 올린 뒤 LMS 가 같은 이름으로 수집하면 content_id 만 갈린다 —
+    manual-강의.pdf.json 이 done 인데 장부는 새 숫자 cid 를 준다. 그대로 두면
+    03:00 cron 이 같은 문서를 다시 요약한다(돈 두 배). load_progress_for 가
+    manual- 별칭으로 폴백해야 한다."""
+
+    def _week_with_alias(self, tmp):
+        d = wk(tmp)  # meta.json 이 강의.pdf 를 cid1 로 등록해 둔다
+        sm.save_progress(d, "manual-강의.pdf", {"file": "강의.pdf", "status": "done"})
+        return d
+
+    def test_load_progress_for_falls_back_to_manual_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._week_with_alias(tmp)
+            rec = sm.load_progress_for(d, "cid1", "강의.pdf")
+            self.assertEqual(rec.get("status"), "done")
+
+    def test_load_progress_for_prefers_direct_key(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = wk(tmp)
+            sm.save_progress(d, "cid1", {"file": "강의.pdf", "status": "in_progress"})
+            sm.save_progress(d, "manual-강의.pdf", {"file": "강의.pdf", "status": "done"})
+            rec = sm.load_progress_for(d, "cid1", "강의.pdf")
+            self.assertEqual(rec.get("status"), "in_progress",
+                             "직접 키가 있으면 별칭을 보지 않는다")
+
+    def test_load_progress_for_does_not_alias_manual_keys(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = wk(tmp)
+            rec = sm.load_progress_for(d, "manual-강의.pdf", "강의.pdf")
+            self.assertEqual(rec, {}, "manual- 키 자신은 다시 별칭을 찾지 않는다")
+
+    def test_run_skips_and_never_calls_llm_when_alias_is_done(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._week_with_alias(tmp)
+
+            def forbidden(prompt, **k):
+                raise AssertionError("이미 done 인데 LLM 을 불렀다 — 돈 두 배")
+
+            with mock.patch.object(sm, "DATA_DIR", pathlib.Path(tmp)):
+                res = sm.run("2026-2", extract=lambda p: ("가" * 2000, {"pages": 13}),
+                             llm=forbidden, log=lambda *a: None, sources=("ledger",))
+            self.assertEqual(res["done"], 0)
+            self.assertEqual(res["skipped"], 1)
+
+    def test_run_resaves_alias_under_numeric_cid(self):
+        """별칭 조회는 한 번만 필요하다 — 다음부터는 숫자 cid 로 바로 찾는다."""
+        with tempfile.TemporaryDirectory() as tmp:
+            d = self._week_with_alias(tmp)
+            with mock.patch.object(sm, "DATA_DIR", pathlib.Path(tmp)):
+                sm.run("2026-2", extract=lambda p: ("가" * 2000, {"pages": 13}),
+                      llm=lambda p, **k: (_ for _ in ()).throw(AssertionError("불림")),
+                      log=lambda *a: None, sources=("ledger",))
+            rec = sm.load_progress(d, "cid1")
+            self.assertEqual(rec.get("status"), "done")
+            self.assertEqual(rec.get("file"), "강의.pdf")
+
+    def test_estimate_counts_alias_as_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            self._week_with_alias(tmp)
+            with mock.patch.object(sm, "DATA_DIR", pathlib.Path(tmp)):
+                e = sm.estimate("2026-2", extract=lambda p: ("가" * 2000, {"pages": 13}),
+                                sources=("ledger",))
+            self.assertEqual(e["skipped"], 1)
+            self.assertEqual(e["docs"], 0)
+
+
 class Estimate(unittest.TestCase):
     """키 없이 비용을 먼저 본다."""
 
