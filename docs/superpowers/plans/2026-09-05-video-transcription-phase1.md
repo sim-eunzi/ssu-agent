@@ -21,6 +21,23 @@
 - **작업 파일** — `state/tmp/{content_id}.mp4`. `state/` 는 git 미추적.
 - **커밋 규약** — 태스크마다 1커밋. 메시지 첫 줄에 `[T{번호}]` 를 넣어 `git log --oneline` 으로 재개 지점을 찾는다.
 
+## 🔵 다음 세션은 여기부터 — **T3**
+
+```bash
+cd ~/ssu-agent
+git log --oneline | grep '\[T'          # T1·T2 커밋이 보이면 정상
+python3 -m unittest discover -s tests -t . -q   # 184건 OK 여야 한다
+```
+
+**T3 Step 1 이 첫 할 일이다** — `pip3 install faster-whisper`.
+이게 이 계획에서 **처음으로 뭔가를 설치하는 지점**이다. Intel macOS 용
+`ctranslate2` 휠이 없으면 여기서 멈추고 설계를 다시 봐야 한다 (T3 Step 1 참조).
+
+설치가 되면 T3 나머지(테스트 → `transcribe_file` → `doctor` 한 줄)를 밟고,
+T4 에서 **6.3분짜리 영상 1개로 실측**한다 — `창의융합인재되기-3code W01
+"Deep learning creativity"`. T1 에서 실제 스냅샷으로 확인한 최단 영상이다.
+58분짜리로 실측할 필요가 없다.
+
 ## 진행 상황 (세션이 끊기면 여기부터)
 
 - [x] **T1 순수 함수** — `parse_media_uri` · `plan` · `to_markdown` ✅ 2026-09-05 (13건, 전체 179건 OK)
