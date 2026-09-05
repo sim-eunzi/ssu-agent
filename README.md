@@ -65,6 +65,9 @@ cp .env.example .env      # CANVAS_TOKEN 채우기
 ./bin/ssu-agent summarize --include-manual  # 장부 + 직접 올린 것 전부
 ```
 
+같은 이름으로 다시 올리려면 `.progress/manual-{이름}.json` 도 지워라 — 지우지
+않으면 옛 기록이 `done` 이라 새로 올린 파일이 재요약되지 않는다.
+
 ### 코코봇이 부르는 법
 
 ```
@@ -90,7 +93,7 @@ vault 를 고치면 마감이 되돌아간다. 나머지 단계는 서로 독립
 자세한 설계: `docs/superpowers/specs/2026-09-06-summarize-entry-design.md`.
 
 헤르메스 terminal 의 foreground 상한은 600초다 (`FOREGROUND_MAX_TIMEOUT`).
-실측 21.7초라 여유가 있지만, 새 주차가 열려 자료 100MB + 요약이 붙는 날은
+실측 21.7초라 여유가 있지만, 새 주차가 열려 자료 100MB 가 붙는 날은
 `timeout=600` 을 명시해서 부르는 게 안전하다.
 
 의존성 없음. venv 없이 시스템 `python3` 로 돈다 (3.8+).
