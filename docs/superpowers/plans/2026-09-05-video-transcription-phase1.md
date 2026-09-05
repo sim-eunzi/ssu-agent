@@ -24,7 +24,7 @@
 ## 진행 상황 (세션이 끊기면 여기부터)
 
 - [x] **T1 순수 함수** — `parse_media_uri` · `plan` · `to_markdown` ✅ 2026-09-05 (13건, 전체 179건 OK)
-- [ ] T2 취득 — `download` (Range 이어받기, 스트리밍)
+- [x] **T2 취득** — `download` (Range 이어받기, 스트리밍) ✅ 2026-09-05 (5건, 전체 184건 OK)
 - [ ] T3 전사 — `transcribe_file` + `faster-whisper` 설치
 - [ ] T4 CLI + **실측** — `ssu-agent transcribe --limit 1`
 

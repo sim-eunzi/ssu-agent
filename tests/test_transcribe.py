@@ -4,9 +4,12 @@
 계획: docs/superpowers/plans/2026-09-05-video-transcription-phase1.md
 스펙: docs/superpowers/specs/2026-09-05-video-transcription-design.md
 """
+import io
 import os
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -98,6 +101,87 @@ class TestToMarkdown(unittest.TestCase):
         md = transcribe.to_markdown([], {"source": "s", "duration": 0,
                                          "model": "small", "at": "2026-09-05"})
         self.assertIn("s", md)
+
+
+class _FakeResp:
+    """`open_url` 이 돌려주는 것의 최소 형태 — status·headers·read·컨텍스트."""
+
+    def __init__(self, body, status=200, headers=None):
+        self._b = io.BytesIO(body)
+        self.status = status
+        self.headers = headers or {}
+
+    def read(self, n):
+        return self._b.read(n)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+class TestDownload(unittest.TestCase):
+    def test_fresh_download(self):
+        seen = {}
+
+        def open_url(url, headers):
+            seen["headers"] = headers
+            return _FakeResp(b"abcdef")
+
+        with tempfile.TemporaryDirectory() as d:
+            dest = Path(d) / "v.mp4"
+            n = transcribe.download("http://x/v.mp4", dest, open_url=open_url)
+            self.assertEqual(dest.read_bytes(), b"abcdef")
+        self.assertEqual(n, 6)
+        self.assertNotIn("Range", seen["headers"])   # 처음이면 Range 안 붙인다
+
+    def test_resumes_from_part(self):
+        """이미 받아둔 만큼은 다시 받지 않는다."""
+        seen = {}
+
+        def open_url(url, headers):
+            seen["headers"] = headers
+            return _FakeResp(b"def", status=206)
+
+        with tempfile.TemporaryDirectory() as d:
+            dest = Path(d) / "v.mp4"
+            Path(str(dest) + ".part").write_bytes(b"abc")
+            n = transcribe.download("http://x/v.mp4", dest, open_url=open_url)
+            self.assertEqual(dest.read_bytes(), b"abcdef")
+        self.assertEqual(seen["headers"]["Range"], "bytes=3-")
+        self.assertEqual(n, 6)
+
+    def test_part_is_renamed_on_success(self):
+        def open_url(url, headers):
+            return _FakeResp(b"xy")
+
+        with tempfile.TemporaryDirectory() as d:
+            dest = Path(d) / "v.mp4"
+            transcribe.download("http://x/v.mp4", dest, open_url=open_url)
+            self.assertTrue(dest.exists())
+            self.assertFalse(Path(str(dest) + ".part").exists())
+
+    def test_server_ignores_range_restarts(self):
+        """206 이 아니라 200 이 오면 서버가 Range 를 무시한 것 —
+        이어붙이면 파일이 깨지므로 처음부터 다시 쓴다."""
+        def open_url(url, headers):
+            return _FakeResp(b"ABCDEF", status=200)
+
+        with tempfile.TemporaryDirectory() as d:
+            dest = Path(d) / "v.mp4"
+            Path(str(dest) + ".part").write_bytes(b"abc")
+            transcribe.download("http://x/v.mp4", dest, open_url=open_url)
+            self.assertEqual(dest.read_bytes(), b"ABCDEF")
+
+    def test_creates_missing_directory(self):
+        def open_url(url, headers):
+            return _FakeResp(b"z")
+
+        with tempfile.TemporaryDirectory() as d:
+            dest = Path(d) / "nested" / "deep" / "v.mp4"
+            transcribe.download("http://x/v.mp4", dest, open_url=open_url)
+            self.assertTrue(dest.exists())
 
 
 if __name__ == "__main__":

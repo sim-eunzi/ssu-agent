@@ -14,9 +14,12 @@
 스펙: docs/superpowers/specs/2026-09-05-video-transcription-design.md
 """
 
+import os
 import re
+import urllib.request
 
 from . import materials
+from .net import UA
 
 # 🔴 `main_media` 에는 media_uri 가 여럿이다 — desktop>html5(progressive, CDN),
 #    desktop>flash_fallback(pseudo), mobile>html5. **순서에 의존하지 않으려고**
@@ -93,3 +96,50 @@ def to_markdown(segments, meta):
         "[%s] %s" % (_mmss(s.get("start")), (s.get("text") or "").strip())
         for s in segments or [])
     return head + "\n" + body + "\n"
+
+
+# ------------------------------------------------------------------ 취득
+def _open_url(url, headers):
+    req = urllib.request.Request(url, headers=dict(headers or {}))
+    req.add_header("User-Agent", UA)
+    return urllib.request.urlopen(req, timeout=60)
+
+
+def download(url, dest, open_url=None, chunk=1 << 20, log=None):
+    """`Range` 로 이어받는 스트리밍 다운로드. 받은 총 바이트를 낸다.
+
+    🔴 **`net.request` 를 쓰지 않는다** — 그건 응답 전체를 메모리에 읽는다
+    (`net._body`). 실측 476MB 짜리를 그렇게 받으면 안 된다. 여기만 `urllib`
+    을 직접 쓰는 이유다.
+
+    `.part` 로 받고 완결되면 rename 한다. 반쯤 받은 파일이 `dest` 이름으로
+    보이면 전사가 그걸 집어간다.
+
+    서버가 `Range` 를 무시하고 200 을 주면 **이어붙이지 않고 처음부터** 쓴다 —
+    이어붙이면 파일이 조용히 깨진다.
+    """
+    open_url = open_url or _open_url
+    dest = str(dest)
+    part = dest + ".part"
+    d = os.path.dirname(dest)
+    if d:
+        os.makedirs(d, exist_ok=True)
+
+    have = os.path.getsize(part) if os.path.exists(part) else 0
+    headers = {"Range": "bytes=%d-" % have} if have else {}
+
+    with open_url(url, headers) as r:
+        if have and getattr(r, "status", 200) != 206:
+            have = 0                      # 서버가 Range 를 무시했다
+            headers = {}
+        with open(part, "ab" if have else "wb") as f:
+            while True:
+                buf = r.read(chunk)
+                if not buf:
+                    break
+                f.write(buf)
+                have += len(buf)
+    os.replace(part, dest)
+    if log:
+        log("  ↓ %s (%.0fMB)" % (os.path.basename(dest), have / 1048576.0))
+    return have
