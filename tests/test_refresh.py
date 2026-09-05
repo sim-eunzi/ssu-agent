@@ -197,3 +197,35 @@ class ErrorsAreTranslated(unittest.TestCase):
     def test_render_translates_too(self):
         res = rf.run({"sync": lambda: {"ok": False, "line": "HttpError: HTTP 401 x"}})
         self.assertIn("토큰", rf.render(res))
+
+
+class LimitReachesSummarize(unittest.TestCase):
+    """🔴 2026-09-05 실측 — `refresh` 의 요약 단계가 TypeError 로 죽었다.
+
+    `--limit` 기본값이 `summarize` 파서는 MAX_CALLS(30) 인데 `refresh` 파서만
+    None 이었다. 그 None 이 `_Args` → `cmd_summarize` → `run(max_calls=None)`
+    까지 그대로 흘러 `summarize.py` 의 `res["calls"] >= max_calls` 에서 터진다.
+
+    09-02 부터 있던 결함인데 안 드러난 이유: 그 비교는 **아직 요약 안 된 대상이
+    하나라도 있어야** 도달한다. 그전엔 대상 5개가 전부 done 이라 루프가 전부
+    continue 로 빠졌다 (cron 로그 4일치가 "건너뜀 5 · 호출 0회"). 오늘 자료
+    19개가 새로 들어오면서 처음 닿았다.
+
+    🔴 기존 테스트가 못 잡은 이유 — 파서를 안 거치고 `_Args(limit=None)` 를
+    손으로 만들어 넣었다. 그래서 **파서 기본값을 통과시키는 것**이 이 테스트의 일이다.
+    """
+
+    def test_refresh_parser_gives_summarize_a_usable_limit(self):
+        from ssu_agent import cli, summarize
+
+        a = cli.build_parser().parse_args(["refresh"])
+        self.assertIsNotNone(
+            a.limit, "refresh 의 --limit 기본값이 None 이면 요약 단계가 죽는다")
+
+        # 실제 비교 지점까지 닿는지 — 여기서 TypeError 가 나면 회귀다.
+        try:
+            0 >= a.limit
+        except TypeError as e:
+            self.fail("summarize.run 의 상한 비교가 터진다: %s" % e)
+        self.assertEqual(a.limit, summarize.MAX_CALLS,
+                         "두 파서의 --limit 기본값은 같아야 한다")

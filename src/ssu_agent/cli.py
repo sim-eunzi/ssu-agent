@@ -388,7 +388,11 @@ def build_parser():
                     help="LLM 요약 건너뛰기 (비용 0)")
     rf.add_argument("--no-materials", action="store_true",
                     help="자료 다운로드·요약 건너뛰기")
-    rf.add_argument("--limit", type=int, default=None, help="요약 LLM 호출 상한")
+    # 🔴 기본값을 summarize 파서와 **같이** 둔다. 여기만 None 이었을 때
+    # `_Args(limit=None)` → `run(max_calls=None)` → `calls >= None` 로 죽었다
+    # (2026-09-05). 같은 플래그에 기본값이 둘이면 언젠가 갈린다.
+    rf.add_argument("--limit", type=int, default=summarize.MAX_CALLS,
+                    help="요약 LLM 호출 상한 (기본 %d)" % summarize.MAX_CALLS)
     rf.add_argument("--dry-run", action="store_true")
     rf.add_argument("--verbose", action="store_true", help="각 단계 원문 출력")
     rf.set_defaults(func=cmd_refresh)
