@@ -16,6 +16,8 @@
 - `비고` 에 쓰지 않는다. `--note` 는 셀 전체 교체라 사람이 쓴 것을 덮는다
   (195행 중 71행이 채워져 있다). 추적은 `events.py` diff 와 git log 가 한다.
 - 404(`unopened`)는 "안 봤다"지 "했다"가 아니다. `completed` 만 본다.
+  (2026-09-05: 404 의 대부분은 사실 **id 가 틀린 것**이었다 — `sync` 가
+  `attendance_items/summary` 로 id 를 확정하게 고쳤다. 이제 404 는 드물다.)
 """
 
 import json

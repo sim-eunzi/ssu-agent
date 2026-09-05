@@ -91,9 +91,13 @@ def estimate_duration(items, min_sample=MIN_SAMPLE):
 def remaining_seconds(item, estimate=None):
     """아직 봐야 하는 영상 초. 완료·자료는 0.
 
-    progress 의 스케일(0~1 인지 0~100 인지)이 실측 미확인이라 last_at 을
-    바닥값으로 함께 쓴다. 애매하면 '더 남은 쪽'으로 계산한다 — 알림 도구는
-    과소평가보다 과대평가가 낫다.
+    **`progress` 는 초다** — 2026-09-05 실측(확장현실 1주차:
+    progress 2307.42 · duration 2307.43 · last_at 2307.43). 퍼센트로 읽던
+    옛 코드는 `dur * 23.07` 을 만들어 부분 시청 영상을 전부 '다 봤다'로
+    떨어뜨렸다. 완료 항목은 위에서 단락되니 그동안 안 드러났을 뿐이다.
+
+    last_at 을 바닥값으로 함께 쓴다. 애매하면 '더 남은 쪽'으로 계산한다 —
+    알림 도구는 과소평가보다 과대평가가 낫다.
 
     한 번도 안 연 항목(unopened)은 길이를 알 수 없다. LearningX 의
     attendance_items 는 '내가 연 항목'만 있는 개인 기록이라 404 가 난다.
@@ -111,8 +115,8 @@ def remaining_seconds(item, estimate=None):
     watched = float(item.get("last_at") or 0)
     p = item.get("progress")
     if p:
-        watched = max(watched, dur * (p / 100.0 if p > 1 else float(p)))
-    return max(0.0, float(dur) - watched)
+        watched = max(watched, float(p))
+    return max(0.0, float(dur) - min(watched, float(dur)))
 
 
 def _week_field(item, weeks, field):

@@ -114,7 +114,10 @@ Canvas 개인 액세스 토큰은 만료 없음. LearningX JWT는 2시간.
 |---|---|---|
 | 과목 목록 | `/api/v1/courses?enrollment_state=active` | Canvas 토큰 |
 | 주차 구조·마감 | `/learningx/api/v1/courses/{cid}/lessons` | JWT |
+| 출석 아이템 id (권위) | `/learningx/api/v1/courses/{cid}/attendance_items/summary` | JWT |
 | 진도·출석 | `/learningx/api/v1/courses/{cid}/attendance_items/{item_id}` | JWT |
+| 퀴즈·과제 제출 | `/api/v1/courses/{cid}/students/submissions?student_ids[]=self` | Canvas 토큰 |
+| 연습퀴즈 제출 | `/api/v1/courses/{cid}/quizzes/{quiz_id}/submission` | Canvas 토큰 |
 | 모듈·아이템 목록 | `/api/v1/courses/{cid}/modules?include[]=items` | Canvas 토큰 |
 | 강의자료 | `commons.ssu.ac.kr` (아래) | 미확인 |
 
@@ -122,14 +125,27 @@ Canvas 개인 액세스 토큰은 만료 없음. LearningX JWT는 2시간.
 7과목 전부 15건씩 나옴 (Canvas assignments API로는 4과목만 나왔음 — **이쪽이 정본**).
 `lessons[].lessons[]`는 수업 일정 메타(class_date, classroom)일 뿐 항목 배열 아님.
 
-**`attendance_items/{id}`** — 아이템 단위. 목록 엔드포인트는 500이라 N+1 불가피.
+**`attendance_items/{id}`** — 아이템 단위. 평면 목록은 500이지만
+**`attendance_items/summary` 는 200** 이고 그 과목의 진짜 item_id 를 전부 준다.
 
-> **2026-09-02 실측 정정 ★** 이건 과목 콘텐츠 목록이 아니라 **내가 한 번이라도
-> 연 항목의 개인 기록**이다. 안 연 항목은 **404** (`opened: true` 필드가 근거).
-> 7과목 237개 중 156개가 404였고, 분포가 정확히 열람 이력과 일치했다 —
-> 창의융합·선형대수는 0건, 확장현실은 15/15 전부 404.
+> **2026-09-05 실측 재정정 ★★ — 아래 2026-09-02 해석은 틀렸다.**
+> 404 의 원인은 "안 봤다"가 아니라 **우리가 틀린 id 로 물어본 것**이었다.
+> 모듈 `external_url` 의 `.../lecture_attendance/items/view/{id}` 는 과목을
+> 복제하면 **옛 학기 id 가 그대로 남는다.** LTI 뷰 페이지는 그것을 현재
+> id 로 바꿔치기해 렌더링하지만(`data-item_id`), API 는 안 해준다.
 >
-> - 404 는 에러가 아니라 **"안 봤다 = 100% 남았다"는 정보**로 쓴다.
+> 결정적 근거 — `summary` 의 id 집합과 모듈 URL id 집합의 **차집합 크기가
+> 과목별 404 개수와 정확히 일치**했다:
+> 확장현실 0/15겹침·404 15, 정치철학 7/60·404 53, 4차산업 4/52·404 48,
+> 한반도 2/37·404 35, 선형대수·3code 전부 겹침·404 0.
+>
+> 실제 피해: 확장현실 1주차는 영상 시청 완료 + 대면 출석 + 퀴즈 4점까지
+> 다 돼 있었는데 전부 "안 봤다"로 읽혀 vault 에 한 건도 안 올라갔다.
+>
+> - **id 의 권위는 `attendance_items/summary` 다.** 모듈 URL 의 id 는 쓰지 않는다.
+> - `summary` 에는 대면 수업(smart_attendance) 항목도 들어온다 —
+>   `attendance_status: "attendance"` 로 출석이 찍힌다.
+> - 그래도 남는 404 는 그때 비로소 "안 봤다 = 100% 남았다"로 쓴다.
 > - 다만 `duration`도 같이 못 얻는다. `lessons`에도 없고, 다른 경로
 >   (`/attendance_items/{id}` 무과목, `sections/0/components/{id}/progress`,
 >   `components`, `attendances`, `activities`)는 전부 404/400/403/500.

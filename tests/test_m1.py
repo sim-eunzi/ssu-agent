@@ -141,12 +141,14 @@ class TestRemaining(unittest.TestCase):
             {"duration": 1000, "progress": 0, "last_at": 600,
              "content_type": "movie"}), 400)
 
-    def test_percent_and_fraction_agree_at_50(self):
-        a = risk.remaining_seconds({"duration": 1000, "progress": 50,
-                                    "content_type": "movie"})
-        b = risk.remaining_seconds({"duration": 1000, "progress": 0.5,
-                                    "content_type": "movie"})
-        self.assertAlmostEqual(a, b)
+    def test_progress_is_seconds(self):
+        """🔴 2026-09-05 실측으로 뒤집힘. 옛 테스트(`percent_and_fraction_agree`)
+        는 '50 이면 50%, 0.5 면 50%' 라는 **틀린 가정**을 박제하고 있었다.
+        실제로는 초다 — 확장현실 1주차 progress 2307.42 / duration 2307.43."""
+        self.assertAlmostEqual(risk.remaining_seconds(
+            {"duration": 1000, "progress": 50, "content_type": "movie"}), 950)
+        self.assertAlmostEqual(risk.remaining_seconds(
+            {"duration": 1000, "progress": 0.5, "content_type": "movie"}), 999.5)
 
 
 class TestUnopened(unittest.TestCase):

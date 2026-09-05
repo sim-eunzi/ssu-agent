@@ -65,6 +65,20 @@ class Canvas:
         return self.paged("/api/v1/courses/{}/modules".format(cid),
                           **{"include[]": "items"})
 
+    def assignments(self, cid):
+        return self.paged("/api/v1/courses/{}/assignments".format(cid))
+
+    def my_submissions(self, cid):
+        """내 제출 현황. 채점 과제·퀴즈가 여기 다 있다."""
+        return self.paged("/api/v1/courses/{}/students/submissions".format(cid),
+                          **{"student_ids[]": "self"})
+
+    def quiz_submission(self, cid, quiz_id):
+        """`practice_quiz` 는 assignment 가 없어 my_submissions 에 안 나온다.
+        2026-09-05 실측: 확장현실 1주차 퀴즈가 정확히 이 경우다."""
+        raw = self.get("/api/v1/courses/{}/quizzes/{}/submission".format(cid, quiz_id))
+        return (raw or {}).get("quiz_submissions") or []
+
     def announcements(self, cid, start_date=None):
         params = {"context_codes[]": "course_{}".format(cid)}
         if start_date:
@@ -202,3 +216,16 @@ class LearningX:
     def attendance_item(self, cid, item_id):
         return self.get(
             "/learningx/api/v1/courses/{}/attendance_items/{}".format(cid, item_id))
+
+    def attendance_summary(self, cid):
+        """과목의 **진짜** 출석 아이템 id 전부 → {id: {attendance_status}}.
+
+        🔴 이게 권위다. 모듈 `external_url` 의 `.../items/view/{id}` 는 과목을
+        복제하면 옛 id 가 그대로 남아 `attendance_items/{id}` 가 404 를 준다.
+        2026-09-05 실측 — 확장현실 15/15, 정치철학 53/60, 4차산업 48/52,
+        한반도 35/37 이 그 경우였고 전부 '안 봤다'로 오해되고 있었다.
+        (목록 엔드포인트 `attendance_items` 는 500 이지만 `/summary` 는 200.)
+        """
+        raw = self.get(
+            "/learningx/api/v1/courses/{}/attendance_items/summary".format(cid))
+        return (raw or {}).get("attendance_summaries") or {}
