@@ -51,6 +51,12 @@ def cmd_doctor(a):
         print(w.format(k, getattr(cfg, k.lower()) or "— (M2 에서 필요)"))
     print(w.format("last sync", state.last_sync("sync") or "없음"))
     print(w.format("outbox", "{}건 대기".format(len(state.outbox_peek()))))
+    try:
+        import faster_whisper                     # noqa: F401
+        print(w.format("faster-whisper", "✅"))
+    except ImportError:
+        print(w.format("faster-whisper",
+                       "⚠️ 없음 — transcribe 만 못 쓴다 (pip3 install faster-whisper)"))
     print(w.format("알림", "이 에이전트는 전송하지 않는다 (헤르메스봇 담당)"))
     return 0
 

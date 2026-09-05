@@ -143,3 +143,28 @@ def download(url, dest, open_url=None, chunk=1 << 20, log=None):
     if log:
         log("  ↓ %s (%.0fMB)" % (os.path.basename(dest), have / 1048576.0))
     return have
+
+
+# ------------------------------------------------------------------ 전사
+MODEL = os.environ.get("TRANSCRIBE_MODEL", "small")
+_MODELS = {}
+
+
+def _load_model(name):
+    """모델은 무겁다(수백 MB). 한 프로세스 안에서 재사용한다."""
+    if name not in _MODELS:
+        try:
+            from faster_whisper import WhisperModel
+        except ImportError as e:
+            raise RuntimeError(
+                "faster-whisper 가 없다: pip3 install faster-whisper") from e
+        # 이 iMac 은 Intel·GPU 없음 — cpu/int8 이 유일하게 현실적인 조합이다.
+        _MODELS[name] = WhisperModel(name, device="cpu", compute_type="int8")
+    return _MODELS[name]
+
+
+def transcribe_file(path, model=None, language="ko"):
+    """mp4 → 세그먼트 목록. `to_markdown` 이 먹는 형식 그대로 낸다."""
+    m = _load_model(model or MODEL)
+    segments, _info = m.transcribe(str(path), language=language, vad_filter=True)
+    return [{"start": s.start, "end": s.end, "text": s.text} for s in segments]

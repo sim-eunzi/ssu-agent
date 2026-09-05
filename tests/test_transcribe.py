@@ -184,5 +184,35 @@ class TestDownload(unittest.TestCase):
             self.assertTrue(dest.exists())
 
 
+class TestTranscribeFile(unittest.TestCase):
+    """모델은 안 부른다 — 없어도 도는 것만 본다."""
+
+    def test_missing_dependency_is_explained(self):
+        """의존성이 없을 때 메시지가 설치법을 알려주는가."""
+        import builtins
+        real = builtins.__import__
+
+        def fake(name, *a, **kw):
+            if name.startswith("faster_whisper"):
+                raise ImportError("no module")
+            return real(name, *a, **kw)
+
+        builtins.__import__ = fake
+        try:
+            with self.assertRaises(RuntimeError) as cm:
+                transcribe.transcribe_file("/tmp/none.mp4")
+            self.assertIn("faster-whisper", str(cm.exception))
+        finally:
+            builtins.__import__ = real
+
+    def test_import_does_not_require_whisper(self):
+        """모듈 import 만으로는 무거운 의존성을 안 탄다 (의존성 0 규약)."""
+        import importlib
+
+        import ssu_agent.transcribe as t
+
+        importlib.reload(t)     # 예외 없이 통과하면 된다
+
+
 if __name__ == "__main__":
     unittest.main()
