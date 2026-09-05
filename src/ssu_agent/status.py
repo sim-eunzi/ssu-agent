@@ -56,6 +56,20 @@ def _line(label, c):
     return s
 
 
+def _fmt_ts(v):
+    """표시용 다듬기 전용. `collect()` 가 내는 원본 `summarize.now()` 형식
+    (예: "2026-09-05T03:14:03+09:00") 을 "2026-09-05 03:14" 로 자른다.
+    모양이 다르면 원본을 그대로 낸다 — 화면 문구 때문에 죽지 않는다.
+    """
+    try:
+        if (len(v) >= 16 and v[4] == "-" and v[7] == "-"
+                and v[10] == "T" and v[13] == ":"):
+            return v[:16].replace("T", " ")
+    except (TypeError, IndexError):
+        pass
+    return v
+
+
 def render(st):
     """코코봇이 그대로 보내는 텍스트. 마크업은 안 붙인다 (brief 규약)."""
     lines = ["📊 요약 현황 ({})".format(st["semester"]),
@@ -64,7 +78,7 @@ def render(st):
     if st.get("video"):
         lines.append(_line("동영상   ", st["video"]))
     if st.get("last_progress_at"):
-        lines.append("  마지막 장부 갱신 {}".format(st["last_progress_at"]))
+        lines.append("  마지막 장부 갱신 {}".format(_fmt_ts(st["last_progress_at"])))
     return "\n".join(lines) + "\n"
 
 
