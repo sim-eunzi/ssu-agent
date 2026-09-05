@@ -9,6 +9,8 @@
     ssu-agent vault-sync          Canvas 상태를 vault 에 반영 (study.py 경유)
     ssu-agent materials           PDF 자료 내려받기 + 주차 인덱스 갱신 (data/)
     ssu-agent summarize           자료 → 마크다운 → LLM 요약 (--estimate 로 비용 먼저)
+                                  --include-manual 로 손 업로드까지, --manual-only 로 그것만
+    ssu-agent status              요약 현황. 네트워크도 LLM 도 안 탄다 (--json)
 
 **아무것도 전송하지 않는다.** 텔레그램은 헤르메스봇 하나가 담당한다.
 이 CLI 는 계산해서 stdout 으로 내놓기만 한다.
@@ -23,7 +25,8 @@ import time
 
 from . import brief as brief_mod
 from . import canvas as canvas_mod
-from . import events, materials, refresh, risk, state, study_cli, summarize, sync
+from . import (events, lock, materials, refresh, risk, state, status,
+               study_cli, summarize, sync)
 from .config import ROOT, get
 
 
@@ -216,6 +219,15 @@ def cmd_transcribe(a):
     return 0
 
 
+def _sources(a):
+    """플래그 → sources. 기본은 장부만 — 자동 과금 0 계약이다."""
+    if getattr(a, "manual_only", False):
+        return ("manual",)
+    if getattr(a, "include_manual", False):
+        return ("ledger", "manual")
+    return ("ledger",)
+
+
 def cmd_summarize(a):
     """자료 요약. --estimate 는 키 없이 돌아 비용만 어림한다."""
     cfg = get()
@@ -229,7 +241,8 @@ def cmd_summarize(a):
                              % (type(e).__name__, str(e).split("\n")[0][:160]))
         return 0
     if a.estimate:
-        e = summarize.estimate(sem)
+        # 🔴 잠그지 않는다 — estimate 는 장부에도 markdown/ 에도 쓰지 않는다
+        e = summarize.estimate(sem, sources=_sources(a))
         _sum("[예상] 문서 {docs}개 · {chars:,}자 · 호출 {chunks}회 · ${est_usd}"
              .format(**e))
         print("문서 {docs}개 · {chars:,}자 · 호출 {chunks}회 예상".format(**e))
@@ -238,17 +251,31 @@ def cmd_summarize(a):
               .format(**e))
         print("  예상 ${est_usd} ({})  ※ 눈대중이다".format(summarize.MODEL, **e))
         return 0
-    try:
-        res = summarize.run(sem, max_calls=a.limit)
-    except Exception as e:
-        raise SystemExit("요약 실패 — %s: %s"
-                         % (type(e).__name__, str(e).split("\n")[0][:160]))
-    _sum("요약 {done} · 건너뜀 {skipped} · 스캔 {unsupported} · 실패 {failed} "
-         "· 호출 {calls}회{}".format("  ⏸ 상한" if res["budget_hit"] else "", **res))
-    if res.get("in_tokens") or res.get("out_tokens"):
-        print("  실제 토큰 — 입력 {in_tokens:,} · 출력 {out_tokens:,}".format(**res))
-    if res["budget_hit"]:
-        print("  남은 것은 .progress/ 에 있다 — 다음 실행이 이어받는다")
+    with lock.held("summarize") as ok:
+        if not ok:
+            _sum("이미 요약이 돌고 있어. 「현황 봐줘」 로 확인해")
+            return 0                      # 잠금 실패는 에러가 아니다
+        try:
+            res = summarize.run(sem, max_calls=a.limit, sources=_sources(a))
+        except Exception as e:
+            raise SystemExit("요약 실패 — %s: %s"
+                             % (type(e).__name__, str(e).split("\n")[0][:160]))
+        _sum("요약 {done} · 건너뜀 {skipped} · 스캔 {unsupported} · 실패 {failed} "
+             "· 호출 {calls}회{}".format("  ⏸ 상한" if res["budget_hit"] else "", **res))
+        if res.get("in_tokens") or res.get("out_tokens"):
+            print("  실제 토큰 — 입력 {in_tokens:,} · 출력 {out_tokens:,}".format(**res))
+        if res["budget_hit"]:
+            print("  남은 것은 .progress/ 에 있다 — 다음 실행이 이어받는다")
+        return 0
+
+
+def cmd_status(a):
+    """요약 현황. 네트워크도 LLM 도 안 탄다 — 돈이 안 든다."""
+    st = status.collect(get().semester)
+    if a.json:
+        print(json.dumps(st, ensure_ascii=False, indent=1, sort_keys=True))
+        return 0
+    sys.stdout.write(status.render(st))
     return 0
 
 
@@ -266,8 +293,18 @@ def _sum(s):
     print(s)
 
 
+# _Args 로 껍데기를 만들 때 이 목록을 넘기면 🔴 필드를 빠뜨린 자리에서
+# **즉시** TypeError 로 터진다. 2026-09-05 `--limit=None` 사고가 이 껍데기의
+# 조용한 통과에서 났다 — 요약 단계가 통째로 죽었고 원인을 찾는 데 시간이 걸렸다.
+REFRESH_STEP_FIELDS = ("refresh", "dry_run", "verbose")
+
+
 class _Args(object):
-    def __init__(self, **kw):
+    def __init__(self, _fields=None, **kw):
+        if _fields:
+            missing = [f for f in _fields if f not in kw]
+            if missing:
+                raise TypeError("_Args 필드 누락: %s" % ", ".join(missing))
         self.__dict__.update(kw)
 
 
@@ -381,7 +418,16 @@ def build_parser():
                     help="키 없이 문자·토큰·예상비용만 낸다")
     su.add_argument("--limit", type=int, default=summarize.MAX_CALLS,
                     help="이번 실행의 LLM 호출 상한 (기본 %d)" % summarize.MAX_CALLS)
+    g = su.add_mutually_exclusive_group()
+    g.add_argument("--include-manual", action="store_true",
+                   help="손으로 올린 PDF 까지 함께 (기본 꺼짐)")
+    g.add_argument("--manual-only", action="store_true",
+                   help="손으로 올린 PDF 만")
     su.set_defaults(func=cmd_summarize)
+
+    stp = sub.add_parser("status", help="요약 현황 (돈 안 씀)")
+    stp.add_argument("--json", action="store_true", help="코코봇이 받아갈 구조")
+    stp.set_defaults(func=cmd_status)
 
     rf = sub.add_parser("refresh", help="수집→vault→자료→요약 한 번에 (코코봇 입구)")
     rf.add_argument("--no-summary", action="store_true",
