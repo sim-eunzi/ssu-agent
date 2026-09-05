@@ -228,7 +228,7 @@ class TestRunOne(unittest.TestCase):
             open(dest, "wb").write(b"fake mp4")
             return 8
 
-        def transcriber(path):
+        def transcriber(path, initial_prompt=None):
             return [{"start": 0.0, "end": 2.0, "text": "안녕하세요"}]
 
         with tempfile.TemporaryDirectory() as d:
@@ -258,9 +258,69 @@ class TestRunOne(unittest.TestCase):
                 job, "2026-2", root=root, tmp_dir=tmp,
                 resolve=lambda cid: "http://x/v.mp4",
                 fetch=lambda u, p: (open(p, "wb").write(b"x"), 1)[1],
-                transcriber=lambda p: [{"start": 0, "end": 1, "text": "가"}],
+                transcriber=lambda p, initial_prompt=None: [
+                    {"start": 0, "end": 1, "text": "가"}],
                 log=lambda *a: None)
             self.assertEqual(list(tmp.glob("*.mp4")), [])
+
+
+class TestBuildPrompt(unittest.TestCase):
+    """순수 함수 — 모델을 안 탄다."""
+
+    def test_course_and_title(self):
+        p = transcribe.build_prompt({"stem": "창의융합인재되기-3code",
+                                     "title": "Deep learning creativity - 창의성의 6P - 1주차"})
+        # 실측한 그 문자열이어야 한다. stem 은 파일명용이라 하이픈이 들어 있다
+        self.assertEqual(
+            p, "창의융합인재되기 3code. Deep learning creativity - 창의성의 6P - 1주차.")
+
+    def test_title_missing(self):
+        self.assertEqual(transcribe.build_prompt({"stem": "선형대수"}), "선형대수.")
+
+    def test_no_stem_no_title(self):
+        self.assertIsNone(transcribe.build_prompt({}))
+        self.assertIsNone(transcribe.build_prompt({"stem": "", "title": None}))
+
+    def test_is_capped(self):
+        # 224 토큰 상한이 있고, 길수록 나빠진다는 걸 실측했다
+        p = transcribe.build_prompt({"stem": "가" * 400, "title": "나" * 400})
+        self.assertLessEqual(len(p), transcribe.PROMPT_MAX)
+
+
+class TestPromptReachesModel(unittest.TestCase):
+    """만들기만 하고 안 넘기면 아무 소용이 없다 — 전달을 검증한다."""
+
+    def test_transcribe_file_passes_prompt(self):
+        seen = {}
+
+        class FakeModel:
+            def transcribe(self, path, **kw):
+                seen.update(kw)
+                return [], None
+
+        transcribe._MODELS["fake"] = FakeModel()
+        try:
+            transcribe.transcribe_file("/tmp/x.mp4", model="fake",
+                                       initial_prompt="힌트")
+        finally:
+            transcribe._MODELS.pop("fake", None)
+        self.assertEqual(seen.get("initial_prompt"), "힌트")
+
+    def test_run_one_builds_and_passes_prompt(self):
+        seen = {}
+        job = {"stem": "선형대수", "week": 1, "content_id": "c1",
+               "title": "선대 1-1", "duration": 60, "source": "s"}
+
+        def transcriber(path, initial_prompt=None):
+            seen["p"] = initial_prompt
+            return [{"start": 0, "end": 1, "text": "가"}]
+
+        with tempfile.TemporaryDirectory() as d:
+            transcribe.run_one(job, "2026-2", root=Path(d),
+                               resolve=lambda cid: "http://x/v.mp4",
+                               fetch=lambda u, p: open(p, "wb").write(b"x"),
+                               transcriber=transcriber, log=lambda *a: None)
+        self.assertEqual(seen["p"], "선형대수. 선대 1-1.")
 
 
 if __name__ == "__main__":

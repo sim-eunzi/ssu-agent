@@ -32,6 +32,7 @@
 - [x] **T2 취득** — `download` (Range 이어받기, 스트리밍) ✅ 2026-09-05 (5건, 전체 184건 OK)
 - [x] **T3 전사** — `transcribe_file` + `faster-whisper` 설치 ✅ 2026-09-05 (2건, 전체 186건 OK)
 - [x] **T4 CLI + 실측** — `ssu-agent transcribe` ✅ 2026-09-05 (2건, 전체 188건 OK)
+- [x] **T5 `initial_prompt`** — 실측이 낳은 추가 태스크 ✅ 2026-09-05 (6건, 전체 194건 OK)
 
 `git log --oneline | grep '\[T'` 로 어디까지 했는지 확인한다.
 
@@ -803,6 +804,58 @@ git commit -m "[T4] 동영상 전사 — CLI + 영상 1개 실측"
 ```
 
 ---
+
+---
+
+### Task 5: `initial_prompt` — 실측이 낳은 태스크
+
+T4 실측에서 나왔다(「실측 결과」 참조). 제목 한 줄로 전문용어가 살아나고
+속도 손해가 사실상 0 이라, `medium` 승격 대신 이걸 택했다.
+
+**Files:**
+- Modify: `src/ssu_agent/transcribe.py`
+- Modify: `tests/test_transcribe.py`
+
+**Interfaces:**
+- Produces: `build_prompt(job) -> str | None` — 순수 함수. 과목명 + 제목만.
+- 🔴 **주입 계약이 바뀐다** — `transcriber(path, initial_prompt=None)`.
+  T4 테스트 2건이 `lambda p: ...` 였어서 같이 고쳤다.
+- Changes: `transcribe_file(path, model=None, language="ko", initial_prompt=None)`
+- Changes: `run_one` 이 `build_prompt(job)` 을 만들어 `transcriber` 에 넘긴다.
+
+🔴 **자료 본문은 넣지 않는다.** 실측에서 4C 가 `6C, 6C, 6C` 가 되고 띄어쓰기가
+무너졌다. `initial_prompt` 는 지식 주입이 아니라 **디코딩 편향**이다.
+
+- [x] **Step 1: 실패하는 테스트를 쓴다**
+
+모델은 안 부른다 — **프롬프트가 만들어지고 실제로 전달되는가**만 본다.
+`build_prompt` 는 순수 함수라 T1 과 같은 자리에 선다.
+
+- [x] **Step 2: 실패를 확인한다** — 6건 실패 확인 (`has no attribute 'build_prompt'` 외)
+
+- [x] **Step 3: 구현한다**
+
+`build_prompt` · `transcribe_file` 인자 추가 · `run_one` 배선.
+과목 `stem` 은 파일명용이라 하이픈이 들어 있다(`창의융합인재되기-3code`) —
+**공백으로 바꿔 넣는다.** 실측한 문자열이 그 형태였다.
+상한 `PROMPT_MAX` 를 둔다 (whisper `initial_prompt` 는 224 토큰 상한이고,
+길수록 나빠진다는 걸 실측했다).
+
+- [x] **Step 4: 통과를 확인한다** — **194건 OK** (188 + 6)
+
+- [x] **Step 5: 실측 전사본을 지우고 다시 돌린다**
+
+T4 전사본은 프롬프트 없이 만들어졌다. `md_path.exists()` 로 건너뛰므로 **지워야 다시 돈다.**
+
+✅ **확인됨 (2026-09-05).** 재전사한 실제 파일에서 `빔 러닝` **0건** ·
+`Deep learning` **2건** · 4C 는 `빅 C, 미럴 C, 미니 C, 프로 C`.
+142초(다운로드 6초 포함) · 2.7× 실시간. 스크래치 벤치가 아니라 **`run_one` 이
+쓴 실제 산출물**에서 확인했다.
+
+⚠️ 예상대로 **"이경아" 는 그대로다**(PDF 상 이경화) — 요약 LLM 몫으로 넘긴 자리다.
+
+- [x] **Step 6: 커밋**
+
 
 ## 실측 결과 (2026-09-05)
 

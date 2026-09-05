@@ -103,6 +103,31 @@ def to_markdown(segments, meta):
     return head + "\n" + body + "\n"
 
 
+# 224 토큰 상한이 있다. 한국어는 글자당 1토큰을 넘기도 해 넉넉히 아래로 잡는다.
+PROMPT_MAX = 200
+
+
+def build_prompt(job):
+    """전사 힌트 — **과목명 + 영상 제목만**.
+
+    🔴 **자료 본문을 넣지 마라.** 실측(2026-09-05)에서 그 주차 PDF 를 넣었더니
+    창의성 4C 가 `6C, 6C, 6C, 6C` 가 되고 띄어쓰기까지 무너졌다
+    ("꽤오랫동안진행되고있어요"). `initial_prompt` 는 지식 주입이 아니라
+    **디코딩 편향**이라 관련 없는 텍스트가 들어오면 그쪽으로 끌려간다.
+
+    제목만으로도 값을 한다 — 같은 영상에서 "빔 러닝" 이 "Deep learning" 이 되고
+    "빅스이, 리러스이" 가 "빅 C, 미럴 C"(= 요약 LLM 이 복원할 수 있는 형태)가 됐다.
+    속도 손해는 사실상 0 이었다 (3.06× → 2.99×).
+    """
+    # stem 은 파일명용이라 하이픈이 들어 있다 (`창의융합인재되기-3code`)
+    course = (job.get("stem") or "").replace("-", " ").strip()
+    title = (job.get("title") or "").strip()
+    parts = [x for x in (course, title) if x]
+    if not parts:
+        return None
+    return (". ".join(parts) + ".")[:PROMPT_MAX]
+
+
 # ------------------------------------------------------------------ 취득
 def _open_url(url, headers):
     req = urllib.request.Request(url, headers=dict(headers or {}))
@@ -168,10 +193,14 @@ def _load_model(name):
     return _MODELS[name]
 
 
-def transcribe_file(path, model=None, language="ko"):
-    """mp4 → 세그먼트 목록. `to_markdown` 이 먹는 형식 그대로 낸다."""
+def transcribe_file(path, model=None, language="ko", initial_prompt=None):
+    """mp4 → 세그먼트 목록. `to_markdown` 이 먹는 형식 그대로 낸다.
+
+    `initial_prompt` 는 `build_prompt` 가 만든다 — 거기 주의사항이 있다.
+    """
     m = _load_model(model or MODEL)
-    segments, _info = m.transcribe(str(path), language=language, vad_filter=True)
+    segments, _info = m.transcribe(str(path), language=language, vad_filter=True,
+                                   initial_prompt=initial_prompt)
     return [{"start": s.start, "end": s.end, "text": s.text} for s in segments]
 
 
@@ -218,7 +247,9 @@ def run_one(job, semester, root=None, tmp_dir=None, resolve=None,
     """
     resolve = resolve or resolve_media
     fetch = fetch or (lambda url, dest: download(url, dest, log=log))
-    transcriber = transcriber or (lambda p: transcribe_file(p, model=model))
+    transcriber = transcriber or (
+        lambda p, initial_prompt=None: transcribe_file(
+            p, model=model, initial_prompt=initial_prompt))
 
     wd = week_dir(semester, job["stem"], job["week"], root)
     stem = safe_stem(job.get("title"), job["content_id"])
@@ -239,7 +270,7 @@ def run_one(job, semester, root=None, tmp_dir=None, resolve=None,
 
     t0 = time.time()
     fetch(url, str(mp4))
-    segs = transcriber(str(mp4))
+    segs = transcriber(str(mp4), initial_prompt=build_prompt(job))
     took = time.time() - t0
 
     md = to_markdown(segs, {"source": job.get("source"),
