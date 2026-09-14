@@ -19,6 +19,7 @@
 | **대시보드** | ✅ **2026-09-02.** `/univ/{과목}/{주차}` 3분할 — 주차 행·노트·자료/링크 |
 | **M4** 시험 | 미착수 |
 | **출석·진도 정정** | ✅ **2026-09-05.** id 권위를 `summary` 로 · 퀴즈 제출 조회 신설 · `progress` 초 단위 확정. 미개봉 151건 → 0 |
+| **진도율 알림** | ✅ **2026-09-14.** `urgent` — 마감 D-2 이내 · **실제 진도 미완료**만. 아침 체크인 §5 에 배선 |
 
 M1 실측: 인증 1.4초 · 7과목 237항목 수집 14.5초 · 테스트 46건.
 
@@ -43,6 +44,7 @@ study.py add ... --lock-timeout 30    # 멱등 · 주차 정렬 삽입 · 락 �
 | `risk.py` | 잔여 영상 시간 ÷ 실제 가용 시간 → 🟢🟡🟠🔴 |
 | `events.py` | 스냅샷 diff → 마감 앞당겨짐 / D-3 신규 / 휴강·시험 공지 |
 | `brief.py` | 텍스트/JSON 렌더. 전송 없음 |
+| `urgent.py` | 마감 D-N 이내 **미완료**만 선정. `study.py due` 가 vault 의 `⬜/✅` 를 볼 때 이쪽은 스냅샷의 진짜 진도를 본다 |
 | `study_cli.py` | Canvas 상태 → vault. `study.py` 를 서브프로세스로 (직접 쓰기 없음) |
 | `materials.py` | Commons PDF 다운로드 + 주차 인덱스(`meta.json`) |
 | `summarize.py` | 자료 → 마크다운 → LLM 요약. **재개 장부**로 중단·에러를 이어받는다. `sources=("ledger",)` 기본 — `--manual-only`/`--include-manual` 로 손 업로드도 켠다 |
@@ -59,6 +61,7 @@ cp .env.example .env      # CANVAS_TOKEN 채우기
 ./bin/ssu-agent sync      # 수집 → state/snapshot.json
 ./bin/ssu-agent items 선형대수
 ./bin/ssu-agent brief morning
+./bin/ssu-agent urgent --in 2   # 마감 D-2 이내 · 아직 안 끝난 것. **0건이면 0바이트**
 ./bin/ssu-agent refresh    # 수집→vault→자료 한 번에 (실측 21.7초, LLM 안 씀)
 ./bin/ssu-agent status                    # 요약 현황 — 자동 수집·직접 올림 각각 완료/미요약/실패
 ./bin/ssu-agent summarize --manual-only   # 직접 올린 것만 요약

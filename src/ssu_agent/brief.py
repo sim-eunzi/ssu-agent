@@ -151,3 +151,42 @@ def payload(a, kind="morning", events=(), snapshot=None):
         "overdue": a["overdue"],
         "events": list(events),
     }
+
+
+# ------------------------------------------------------- 마감 임박 · 미완료
+KIND_LABEL = {"lecture": "강의", "quiz": "퀴즈",
+              "assignment": "과제", "discussion": "토론"}
+
+
+def _urgent_line(r):
+    when = r["deadline"].strftime("%m-%d %H:%M")
+    head = "{} {} {}주차".format(when, r["stem"], r["week"])
+    label = KIND_LABEL.get(r["kind"], r["kind"])
+    if r["kind"] != "lecture":
+        title = (r.get("title") or "").strip()
+        # 제목이 이미 "3주차 퀴즈" 면 주차를 두 번 쓰지 않는다
+        if title.startswith("{}주차".format(r["week"])):
+            return "{} {} {}".format(when, r["stem"], title[:34]) + " (미제출)"
+        tail = " — " + title[:28] if title else ""
+        return "{} {}{} (미제출)".format(head, label, tail)
+    body = "{} {} {}편".format(head, label, r["count"])
+    if r["remaining_sec"] > 0:
+        body += " · {}{} 남음".format("≈" if r["estimated"] else "",
+                                     fmt_hours(r["remaining_sec"] / 3600.0))
+    return body
+
+
+def urgent(rows, now, days=2):
+    """마감 D-N 이내 · 아직 안 끝난 것. **0건이면 빈 문자열.**
+
+    `study.py due` 와 같은 계약이다 — 호출자(아침 체크인)가 섹션을 통째로
+    생략한다. "오늘은 없어" 같은 말을 대신 만들어 내지 않는다.
+    """
+    if not rows:
+        return ""
+    n = sum(r["count"] for r in rows)
+    out = ["🔥 마감 D-{} · 아직 안 끝난 것 {}건".format(days, n)]
+    out += ["   " + _urgent_line(r) for r in rows[:8]]
+    if len(rows) > 8:
+        out.append("   외 {}줄 — 대시보드에서".format(len(rows) - 8))
+    return "\n".join(out)

@@ -5,6 +5,7 @@
     ssu-agent sync [--full]       LMS 수집 → state/snapshot.json
     ssu-agent brief [kind]        morning|evening|weekly 텍스트
     ssu-agent brief --json        헤르메스봇이 받아갈 구조 (--ack 로 outbox 비움)
+    ssu-agent urgent [--in 2]     마감 D-N 이내인데 아직 안 끝난 것 (0건이면 무출력)
     ssu-agent items [과목]        남은 항목 나열
     ssu-agent vault-sync          Canvas 상태를 vault 에 반영 (study.py 경유)
     ssu-agent materials           PDF 자료 내려받기 + 주차 인덱스 갱신 (data/)
@@ -26,7 +27,7 @@ import time
 from . import brief as brief_mod
 from . import canvas as canvas_mod
 from . import (events, lock, materials, refresh, risk, state, status,
-               study_cli, summarize, sync)
+               study_cli, summarize, sync, urgent)
 from .config import ROOT, get
 
 
@@ -106,6 +107,25 @@ def cmd_brief(a):
         print(brief_mod.render(assessment, a.kind, box))
     if a.ack:
         state.outbox_clear()
+    return 0
+
+
+def cmd_urgent(a, snapshot=None, now=None):
+    """마감 D-N 이내 · 아직 안 끝난 것. **아침 체크인이 붙여넣는다.**
+
+    🔴 **0건이면 아무것도 찍지 않는다** — `study.py due` 와 같은 계약이다.
+    호출자가 섹션을 통째로 생략하므로 "오늘은 없어"를 여기서 만들지 않는다.
+
+    `study.py due` 와 나란히 선다. 저쪽은 vault(`⬜/✅`)를, 이쪽은 스냅샷의
+    진짜 진도를 본다. K-MOOC 3과목은 Canvas 밖이라 여기 안 나온다.
+    """
+    snap = snapshot if snapshot is not None else _snapshot(
+        refresh=a.refresh, full=a.full)
+    now = now or state.now()
+    rows = urgent.fold(urgent.select(snap, now, days=a.days))
+    text = brief_mod.urgent(rows, now, days=a.days)
+    if text:
+        print(text)
     return 0
 
 
@@ -395,6 +415,14 @@ def build_parser():
     br.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
     br.add_argument("--full", action="store_true")
     br.set_defaults(func=cmd_brief)
+
+    ur = sub.add_parser("urgent",
+                        help="마감 D-N 이내인데 아직 안 끝난 것 (0건이면 무출력)")
+    ur.add_argument("--in", dest="days", type=int, default=2, metavar="N",
+                    help="며칠 이내 마감까지 볼지. 기본 2 — 아침 체크인의 계약이다")
+    ur.add_argument("--refresh", action="store_true", help="먼저 sync 한다")
+    ur.add_argument("--full", action="store_true")
+    ur.set_defaults(func=cmd_urgent)
 
     vs = sub.add_parser("vault-sync")
     vs.add_argument("--dry-run", action="store_true",
