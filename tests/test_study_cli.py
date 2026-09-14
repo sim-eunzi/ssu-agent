@@ -27,8 +27,9 @@ def lec(week, title="강의", due=None, completed=False, unopened=False):
             "due_at": due, "completed": completed, "unopened": unopened}
 
 
-def quiz(week, title="3주차 퀴즈", due=None):
-    return {"kind": "quiz", "week": week, "title": title, "due_at": due}
+def quiz(week, title="3주차 퀴즈", due=None, completed=False):
+    return {"kind": "quiz", "week": week, "title": title, "due_at": due,
+            "completed": completed}
 
 
 def vrows(*rows):
@@ -80,7 +81,7 @@ class LectureAggregation(unittest.TestCase):
         got = sc.canvas_rows(snap([lec(3, "3-1"), lec(3, "3-2"), lec(3, "3-3")],
                                   weeks=self.W))
         self.assertEqual(list(got), [(3, "강의")])
-        self.assertFalse(got[(3, "강의")]["ambiguous"], "집계 대상이지 모호한 게 아니다")
+        self.assertEqual(got[(3, "강의")]["count"], 3, "집계 대상이지 모호한 게 아니다")
 
     def test_all_watched_means_done(self):
         got = sc.canvas_rows(snap([lec(3, "a", completed=True),
@@ -115,10 +116,30 @@ class LectureAggregation(unittest.TestCase):
         self.assertEqual(got[(3, "강의")]["title"], "3주차 강의",
                          "vault 의 'N주차 퀴즈' 명명과 맞춘다")
 
-    def test_quizzes_still_ambiguous_when_duplicated(self):
-        """퀴즈는 접지 않는다 — vault 행이 여럿이어야 할 수도 있어 추측이 위험하다."""
-        got = sc.canvas_rows(snap([quiz(8, "A"), quiz(8, "B")]))
-        self.assertTrue(got[(8, "퀴즈")]["ambiguous"])
+    def test_quizzes_fold_like_lectures(self):
+        """퀴즈도 강의와 같은 규칙으로 접는다 (2026-09-14).
+
+        접지 않던 동안 4차산업 1주차 퀴즈는 Canvas 에서 QUIZ 1~4 가 전부
+        완료인데 vault 에서 영영 ⬜ 였다 — 아침마다 끝낸 걸 재촉했다.
+        """
+        got = sc.canvas_rows(snap([quiz(8, "QUIZ 1"), quiz(8, "QUIZ 2")]))
+        self.assertEqual(got[(8, "퀴즈")]["count"], 2)
+        self.assertEqual(got[(8, "퀴즈")]["title"], "8주차 퀴즈")
+
+    def test_folded_quiz_is_done_only_when_all_are(self):
+        got = sc.canvas_rows(snap([quiz(8, "A", completed=True),
+                                   quiz(8, "B", completed=True)]))
+        self.assertTrue(got[(8, "퀴즈")]["completed"])
+        got = sc.canvas_rows(snap([quiz(8, "A", completed=True), quiz(8, "B")]))
+        self.assertFalse(got[(8, "퀴즈")]["completed"],
+                         "하나라도 남았으면 ⬜ 다 — 강의와 같다")
+
+    def test_single_quiz_keeps_its_own_title_and_due(self):
+        """접을 게 없으면 접기 전과 똑같아야 한다."""
+        got = sc.canvas_rows(snap([quiz(3, "3주차 쪽지시험", due=kst_due("09-21"))]))
+        self.assertEqual(got[(3, "퀴즈")]["title"], "3주차 쪽지시험")
+        self.assertEqual(got[(3, "퀴즈")]["due"], "09-21")
+        self.assertEqual(got[(3, "퀴즈")]["count"], 1)
 
 
 class Plan(unittest.TestCase):
@@ -209,13 +230,34 @@ class Plan(unittest.TestCase):
         self.assertEqual(len(skips), 1)
         self.assertEqual(skips[0]["reason"], "ambiguous")
 
-    def test_duplicate_canvas_key_is_skipped(self):
-        """한 주차에 같은 유형이 둘이면 어느 vault 행에 붙일지 알 수 없다."""
-        acts, skips = self._plan(vrows((3, "퀴즈", "09-21", False, "3주차 퀴즈")),
-                                 [quiz(3, title="A", due=kst_due("09-28")),
-                                  quiz(3, title="B", due=kst_due("09-28"))])
-        self.assertEqual(acts, [])
-        self.assertEqual(skips[0]["reason"], "ambiguous_canvas")
+    def test_folded_quizzes_land_on_the_single_vault_row(self):
+        """한 주차 퀴즈 여럿 : vault 1행 — 강의와 같이 접어 반영한다."""
+        acts, skips = self._plan(
+            vrows((3, "퀴즈", "09-21", False, "3주차 퀴즈")),
+            [quiz(3, title="A", due=kst_due("09-28"), completed=True),
+             quiz(3, title="B", due=kst_due("09-28"), completed=True)])
+        self.assertEqual(skips, [])
+        self.assertIn({"action": "done", "stem": "선형대수",
+                       "week": 3, "type": "퀴즈"}, acts)
+
+    def test_folded_quizzes_stay_open_when_one_is_left(self):
+        acts, skips = self._plan(
+            vrows((3, "퀴즈", "09-28", False, "3주차 퀴즈")),
+            [quiz(3, title="A", due=kst_due("09-28"), completed=True),
+             quiz(3, title="B", due=kst_due("09-28"))])
+        self.assertEqual(skips, [])
+        self.assertEqual([a["action"] for a in acts], [])
+
+    def test_folded_quizzes_add_one_row_when_vault_has_none(self):
+        """강의와 같다 — 그 주차가 vault 에 있으면 'N주차 퀴즈' 한 행을 만든다."""
+        acts, skips = self._plan(
+            vrows((3, "강의", "09-28", False, "3주차 강의")),
+            [quiz(3, title="QUIZ 1", due=kst_due("09-28")),
+             quiz(3, title="QUIZ 2", due=kst_due("09-28"))])
+        self.assertEqual(skips, [])
+        self.assertEqual(len(acts), 1)
+        self.assertEqual(acts[0]["action"], "add")
+        self.assertEqual(acts[0]["item"], "3주차 퀴즈")
 
     def test_unsafe_title_is_skipped(self):
         """sane() 이 | 와 개행을 거부한다. 우회하면 대시보드가 행을 조용히 버린다."""
